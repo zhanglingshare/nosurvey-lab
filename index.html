@@ -125,6 +125,58 @@
   .addbar input:focus,.addbar select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .addbar input{flex:1;min-width:125px}
   .addbar button{padding:8px 13px;font-size:13px}
+
+  /* ===== 交付仪表盘 ===== */
+  .dsec{margin-top:26px}
+  .dsec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;gap:10px;flex-wrap:wrap}
+  .dsec-t{font-size:14px;font-weight:700;letter-spacing:-.01em}
+  button.sm{padding:6px 12px;font-size:12.5px;border-radius:8px}
+  .graph{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:10px;overflow:hidden}
+  .graph svg{display:block;width:100%;height:auto}
+  .graph-tools{display:flex;gap:13px;align-items:center}
+  .legend{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .legend i{width:18px;height:0;border-top:3px solid;display:inline-block;border-radius:2px}
+  .lg-pos{border-color:var(--S)!important}.lg-neg{border-color:var(--D)!important}
+  .gnode{cursor:grab}
+  .gnode:active{cursor:grabbing}
+  .gnode rect.bg{fill:#fff;stroke-width:1.6}
+  .gnode text{pointer-events:none}
+  .gnode .nm-t{font-size:12.5px;fill:var(--ink);font-weight:600}
+  .gnode .role-t{font-size:9.5px;font-weight:700}
+  .edge{fill:none;stroke-width:1.9;opacity:.75}
+  .edge.dim{opacity:.18}.edge.hl{opacity:1;stroke-width:2.6}
+  .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:680px){.dgrid{grid-template-columns:1fr}}
+  .dcard{border:1px solid var(--line);border-radius:14px;padding:14px 15px;background:var(--panel)}
+  .dc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .dc-name{font-size:14px;font-weight:700;line-height:1.35}
+  .srg-badge{font-size:11px;font-weight:800;padding:2.5px 8px;border-radius:7px;white-space:nowrap}
+  .srg-S{background:var(--S-bg);color:var(--S)}.srg-A{background:var(--A-bg);color:var(--A)}
+  .srg-B{background:var(--B-bg);color:var(--B)}.srg-C{background:var(--C-bg);color:var(--C)}
+  .srg-D{background:var(--D-bg);color:var(--D)}
+  .badges{display:flex;gap:6px;margin:9px 0;flex-wrap:wrap}
+  .badge{font-size:11px;padding:2.5px 9px;border-radius:7px;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .badge.role{background:var(--accent-soft);color:var(--accent);border-color:var(--accent-soft);font-weight:600}
+  .dc-src{font-size:11.5px;color:var(--muted);line-height:1.55;margin-bottom:8px}
+  .dc-route{font-size:12px;color:#3f4650;background:var(--panel2);border-radius:9px;padding:8px 11px}
+  details.dscale{border:1px solid var(--line);border-radius:12px;margin-bottom:9px;background:var(--panel);overflow:hidden}
+  details.dscale summary{padding:12px 15px;font-size:13px;font-weight:600;cursor:pointer;list-style:none;
+    display:flex;justify-content:space-between;align-items:center;gap:8px}
+  details.dscale summary::-webkit-details-marker{display:none}
+  details.dscale summary .sum-r{font-size:11px;color:var(--muted);font-weight:500}
+  details.dscale[open] summary{border-bottom:1px solid var(--line)}
+  .dscale .body{padding:13px 16px;font-size:12.5px}
+  .dscale .src-line{color:var(--muted);font-size:12px;margin-bottom:9px;line-height:1.6}
+  .dscale .qline{margin:3px 0}
+  .pipe{display:flex;align-items:stretch}
+  .pcard{flex:1;min-width:190px;border:1px solid var(--line);border-radius:14px;padding:15px;background:var(--panel)}
+  .pcard h4{margin:0 0 8px;font-size:13.5px;display:flex;align-items:center}
+  .pnum{display:inline-flex;width:21px;height:21px;border-radius:7px;background:var(--accent);color:#fff;
+    align-items:center;justify-content:center;font-size:11px;margin-right:8px;flex:none}
+  .pcard ul{margin:0;padding-left:18px;font-size:12.5px;color:#3f4650}
+  .pcard li{margin:3.5px 0}
+  .parrow{display:flex;align-items:center;color:var(--line-strong);font-size:20px;padding:0 9px}
+  @media(max-width:680px){.pipe{flex-direction:column}.parrow{transform:rotate(90deg);padding:7px 0;align-self:center}}
 </style>
 </head>
 <body>
@@ -193,11 +245,58 @@
 
   <!-- Step 5 -->
   <section class="card" id="c5">
-    <h2>你的问卷替代方案</h2>
-    <p class="hint">可直接复制到论文/笔记；完整方法论、数据源地图与案例见开源仓库。</p>
-    <textarea id="export" style="min-height:280px"></textarea>
+    <h2>你的研究方案</h2>
+    <p class="hint">概念模型、构念与量表来源、分析路径一屏总览。模型图可<b>拖拽节点</b>重新布局；底部可复制或下载 Markdown。</p>
+
+    <div class="big" id="dKpis"></div>
+
+    <div class="dsec">
+      <div class="dsec-h"><span class="dsec-t">概念模型</span>
+        <div class="graph-tools">
+          <span class="legend"><i class="lg-pos"></i>正向</span>
+          <span class="legend"><i class="lg-neg"></i>负向</span>
+          <button class="ghost sm" id="relayoutBtn" type="button">重新布局</button>
+        </div>
+      </div>
+      <div class="graph" id="graph"></div>
+    </div>
+
+    <div class="dsec">
+      <div class="dsec-h"><span class="dsec-t">构念与替代路线</span></div>
+      <div class="dgrid" id="dCards"></div>
+    </div>
+
+    <div class="dsec">
+      <div class="dsec-h"><span class="dsec-t">问卷量表与来源</span></div>
+      <div id="dScales"></div>
+    </div>
+
+    <div class="dsec">
+      <div class="dsec-h"><span class="dsec-t">数据分析路径</span></div>
+      <div class="pipe">
+        <div class="pcard"><h4><span class="pnum">1</span>数据整理</h4>
+          <ul><li>回收与清洗</li><li>编码与反向题处理</li><li>缺失值处理</li></ul></div>
+        <div class="parrow">→</div>
+        <div class="pcard"><h4><span class="pnum">2</span>SPSS · 描述与信度</h4>
+          <ul><li>描述性统计（样本特征/均值/标准差）</li><li>信度 Cronbach’s α</li><li>相关分析</li><li>共同方法偏差 Harman 单因子</li></ul></div>
+        <div class="parrow">→</div>
+        <div class="pcard"><h4><span class="pnum">3</span>SmartPLS · PLS-SEM</h4>
+          <ul><li>测量模型：载荷、CR、AVE</li><li>区别效度 HTMT / Fornell–Larcker</li><li>结构模型：β、R²、f²、Q²</li><li>5000 次 bootstrap 检验假设</li></ul></div>
+      </div>
+    </div>
+
+    <div class="dsec">
+      <div class="dsec-h"><span class="dsec-t">导出 Markdown</span>
+        <div class="graph-tools">
+          <button class="ghost sm" id="copyBtn" type="button">复制</button>
+          <button class="ghost sm" id="dlBtn" type="button">下载 .md</button>
+        </div>
+      </div>
+      <textarea id="export" style="min-height:230px"></textarea>
+    </div>
+
     <div class="nav"><button class="ghost" id="to4b">← 上一步</button>
-      <button class="primary" id="copyBtn">复制方案</button></div>
+      <button class="primary" id="restartBtn" type="button">重新跑一个</button></div>
   </section>
 
   <footer>
@@ -500,7 +599,133 @@ document.getElementById('to3').onclick=function(){renderSurvey();go(3);};
 document.getElementById('to2b').onclick=function(){go(2);};
 document.getElementById('to4').onclick=function(){renderCompare();go(4);};
 document.getElementById('to3b').onclick=function(){go(3);};
-document.getElementById('to5').onclick=function(){renderExport();go(5);};
+// ===== 交付：可交互概念模型网络图 =====
+var NW=150,NH=52,GW=900,graphPos=null;
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function wrapName(name){var m=8;
+  if(name.length<=m)return[name];
+  if(name.length<=m*2)return[name.slice(0,m),name.slice(m)];
+  return[name.slice(0,m),name.slice(m,m*2-1)+'…'];}
+function roleColor(r){return{自变量:'#0f766e',中介:'#0284c7',因变量:'#334155',调节:'#c2780a',控制:'#94a3b8',待定位:'#9aa1ab'}[r]||'#9aa1ab';}
+function srgColors(lv){return{S:['#d3f5e5','#059669'],A:['#dff1fc','#0284c7'],B:['#fbf0d4','#c2780a'],C:['#fdebd6','#e06512'],D:['#fde2e2','#dc2626']}[lv];}
+function layoutGraph(){
+  var indeg={},outdeg={};nodes.forEach(n=>{indeg[n.name]=0;outdeg[n.name]=0;});
+  rels.forEach(r=>{indeg[r.b]++;outdeg[r.a]++;});
+  var layer={},queue=[];nodes.forEach(n=>{if(indeg[n.name]===0){layer[n.name]=0;queue.push(n.name);}});
+  var rem=rels.slice(),guard=0;
+  while(rem.length&&guard<1200){guard++;var prog=false;
+    for(var i=rem.length-1;i>=0;i--){var r=rem[i];
+      if(layer[r.a]!==undefined){layer[r.b]=Math.max(layer[r.b]===undefined?-1:layer[r.b],layer[r.a]+1);
+        rem.splice(i,1);prog=true;}}
+    if(!prog)break;}
+  nodes.forEach(n=>{if(layer[n.name]===undefined)layer[n.name]=0;});
+  var maxL=0;nodes.forEach(n=>{maxL=Math.max(maxL,layer[n.name]);});
+  var specials=[];nodes.forEach(n=>{if(n.role==='调节'||n.role==='控制')specials.push(n.name);});
+  nodes.forEach(n=>{if(specials.indexOf(n.name)<0){
+    if(n.role==='自变量')layer[n.name]=0;
+    if(n.role==='因变量')layer[n.name]=Math.max(maxL,1);}});
+  maxL=0;nodes.forEach(n=>{if(specials.indexOf(n.name)<0)maxL=Math.max(maxL,layer[n.name]);});
+  var cols={};for(var l=0;l<=maxL;l++)cols[l]=[];
+  nodes.forEach(n=>{if(specials.indexOf(n.name)<0)cols[layer[n.name]].push(n.name);});
+  var padX=120,colW=maxL===0?0:(GW-2*padX)/maxL,pos={};
+  for(var ll=0;ll<=maxL;ll++){var arr=cols[ll];
+    var x=maxL===0?GW/2-NW/2:padX+ll*colW-NW/2;
+    arr.forEach((nm,i)=>{pos[nm]={x:x,y:62+i*(NH+44)};});}
+  var rows=0;for(var q=0;q<=maxL;q++)rows=Math.max(rows,cols[q].length);
+  var topH=62+rows*(NH+44)+8;
+  var sy=topH+16,step=specials.length?(GW-40)/specials.length:0;
+  specials.forEach((nm,i)=>{pos[nm]={x:20+i*step,y:sy};});
+  var H=topH+(specials.length?NH+42:30);
+  return{pos:pos,W:GW,H:H};
+}
+function edgeD(a,b,pos){var p=pos[a],q=pos[b];
+  var ax=p.x+NW/2,ay=p.y+NH/2,bx=q.x+NW/2,by=q.y+NH/2;
+  if(Math.abs(bx-ax)<NW*0.85){var up=by>ay;
+    if(up)return"M"+ax+" "+(p.y+NH)+" C"+ax+" "+(p.y+NH+32)+","+bx+" "+(q.y-32)+","+bx+" "+q.y;
+    return"M"+ax+" "+p.y+" C"+ax+" "+(p.y-32)+","+bx+" "+(q.y+NH+32)+","+bx+" "+(q.y+NH);}
+  var right=bx>ax,sxp=right?p.x+NW:p.x,syp=ay,exp=right?q.x:q.x+NW,eyp=by;
+  var dx=Math.max(32,Math.abs(exp-sxp)/2),sgn=right?1:-1;
+  return"M"+sxp+" "+syp+" C"+(sxp+sgn*dx)+" "+syp+","+(exp-sgn*dx)+" "+eyp+","+exp+" "+eyp;}
+function buildGraph(keep){
+  var L=layoutGraph();
+  if(keep&&graphPos)for(var k in graphPos)if(L.pos[k])L.pos[k]=graphPos[k];
+  graphPos=L.pos;var svg="<svg viewBox='0 0 "+L.W+" "+L.H+"' xmlns='http://www.w3.org/2000/svg'><defs>"+
+   "<marker id='arp' markerWidth='9' markerHeight='9' refX='7.5' refY='3' orient='auto' markerUnits='userSpaceOnUse'><path d='M0,0 L7.5,3 L0,6 Z' fill='#059669'/></marker>"+
+   "<marker id='arn' markerWidth='9' markerHeight='9' refX='7.5' refY='3' orient='auto' markerUnits='userSpaceOnUse'><path d='M0,0 L7.5,3 L0,6 Z' fill='#dc2626'/></marker></defs><g>";
+  rels.forEach((r,i)=>{var pos=r.sign==='+1'?'#059669':'#dc2626',mk=r.sign==='+1'?'arp':'arn';
+    svg+="<path class='edge' data-i='"+i+"' d='"+edgeD(r.a,r.b,L.pos)+"' stroke='"+pos+"' marker-end='url(#"+mk+")'/>";});
+  svg+="</g><g>";
+  nodes.forEach(nd=>{var p=L.pos[nd.name],g=grade(nd.name,nd.type),sc=srgColors(g.level),rc=roleColor(nd.role),lines=wrapName(nd.name);
+    svg+="<g class='gnode' data-nm='"+esc(nd.name)+"' transform='translate("+p.x+","+p.y+")'>"+
+      "<rect class='bg' width='"+NW+"' height='"+NH+"' rx='11' stroke='"+rc+"'/>"+
+      "<circle cx='14' cy='14' r='10.5' fill='"+sc[0]+"'/><text x='14' y='17.5' text-anchor='middle' font-size='10.5' font-weight='800' fill='"+sc[1]+"'>"+g.level+"</text>"+
+      "<text x='"+(NW-9)+"' y='17' text-anchor='end' class='role-t' fill='"+rc+"'>"+nd.role+"</text>";
+    lines.forEach((ln,i)=>{svg+="<text class='nm-t' x='"+NW/2+"' y='"+(33+i*15)+"' text-anchor='middle'>"+esc(ln)+"</text>";});
+    svg+="</g>";});
+  svg+="</g></svg>";document.getElementById('graph').innerHTML=svg;bindDrag();
+}
+function bindDrag(){
+  document.querySelectorAll('#graph .gnode').forEach(g=>{
+    var drag=false,sx,sy,ox,oy,nm=g.getAttribute('data-nm');
+    g.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;sy=e.clientY;
+      ox=graphPos[nm].x;oy=graphPos[nm].y;
+      if(g.setPointerCapture)g.setPointerCapture(e.pointerId);
+      document.querySelectorAll('#graph .edge').forEach(pa=>{var r=rels[+pa.getAttribute('data-i')],hl=r.a===nm||r.b===nm;
+        pa.classList.toggle('hl',hl);pa.classList.toggle('dim',!hl);});});
+    g.addEventListener('pointermove',e=>{if(!drag)return;
+      var svg=document.querySelector('#graph svg'),scale=svg.viewBox.baseVal.width/svg.getBoundingClientRect().width;
+      graphPos[nm].x=ox+(e.clientX-sx)*scale;graphPos[nm].y=oy+(e.clientY-sy)*scale;
+      g.setAttribute('transform','translate('+graphPos[nm].x+','+graphPos[nm].y+')');
+      document.querySelectorAll('#graph .edge').forEach(pa=>{var r=rels[+pa.getAttribute('data-i')];
+        if(r.a===nm||r.b===nm)pa.setAttribute('d',edgeD(r.a,r.b,graphPos));});});
+    var end=()=>{drag=false;document.querySelectorAll('#graph .edge').forEach(pa=>pa.classList.remove('hl','dim'));};
+    g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);});
+}
+function renderDeliverKpis(){
+  var sa=nodes.filter(n=>{var g=grade(n.name,n.type);return g.level==='S'||g.level==='A';}).length;
+  var pct=nodes.length?Math.round(sa/nodes.length*100):0;
+  var sc=nodes.filter(n=>{var s=matchScale(n.name);return s&&!s.special;}).length;
+  document.getElementById('dKpis').innerHTML=[[nodes.length,'构念'],[rels.length,'关系（假设）'],[pct+'%','零问卷构念占比'],[sc,'匹配成熟量表']]
+    .map(x=>"<div class='kpi'><b class='num'>"+x[0]+"</b><span>"+x[1]+"</span></div>").join('');
+}
+function renderDeliverCards(){
+  document.getElementById('dCards').innerHTML=nodes.map(nd=>{
+    var g=grade(nd.name,nd.type),s=matchScale(nd.name),src;
+    if(s&&s.special==='gcs')src='无统一量表 · 建议客观编码（GCS），自编须报 EFA/CR/AVE';
+    else if(s)src='量表：'+s.n+'<br>来源：'+s.c;
+    else src='未匹配成熟量表，须检索原始出处，不得用无出处题项';
+    return"<div class='dcard'><div class='dc-top'><span class='dc-name'>"+esc(nd.name)+"</span>"+
+      "<span class='srg-badge srg-"+g.level+"'>"+g.level+"</span></div>"+
+      "<div class='badges'><span class='badge role'>"+nd.role+"</span><span class='badge'>"+nd.type+"</span></div>"+
+      "<div class='dc-src'>"+src+"</div><div class='dc-route'>"+ALTROUTE[g.level]+"</div></div>";}).join('');
+}
+function renderDeliverScales(){
+  document.getElementById('dScales').innerHTML=nodes.map(nd=>{
+    var s=matchScale(nd.name);
+    if(s&&s.special==='gcs')
+      return"<details class='dscale'><summary><span>"+esc(nd.name)+"</span><span class='sum-r'>客观编码</span></summary>"+
+        "<div class='body'><div class='src-line'>无统一成熟量表。建议用 GCS 五维客观编码（纹样/工艺/版型/重构/密度）替代自报；自编问卷须报告 EFA、CR、AVE。</div></div></details>";
+    if(s){var qs=s.i.map((q,i)=>"<div class='qline'>"+(i+1)+". "+esc(q)+"</div>").join('');
+      return"<details class='dscale'><summary><span>"+esc(nd.name)+"</span><span class='sum-r'>"+s.n+"</span></summary>"+
+        "<div class='body'><div class='src-line'>来源："+s.c+"</div>"+qs+
+        "<div class='src-line' style='margin-top:9px'>计分：李克特5级（1 非常不同意 — 5 非常同意）；正式使用请核对原文、引用出处。</div></div></details>";}
+    return"<details class='dscale'><summary><span>"+esc(nd.name)+"</span><span class='sum-r'>待补量表</span></summary>"+
+      "<div class='body'><div class='src-line'>未匹配到成熟量表。请检索“"+esc(nd.name)+" 量表”，引用原始开发者与年份；自编须做内容效度、EFA、CR、AVE。</div></div></details>";
+  }).join('');
+}
+function renderDeliver(){
+  renderDeliverKpis();buildGraph(false);renderDeliverCards();renderDeliverScales();renderExport();
+}
+document.getElementById('to5').onclick=function(){renderDeliver();go(5);};
+document.getElementById('relayoutBtn').onclick=function(){buildGraph(false);};
+document.getElementById('restartBtn').onclick=function(){go(1);};
+document.getElementById('copyBtn').onclick=function(){var t=document.getElementById('export'),b=this;
+  var done=()=>{b.textContent='已复制 ✓';setTimeout(()=>b.textContent='复制',1500);};
+  if(navigator.clipboard)navigator.clipboard.writeText(t.value).then(done).catch(()=>{t.select();document.execCommand('copy');done();});
+  else{t.select();document.execCommand('copy');done();}};
+document.getElementById('dlBtn').onclick=function(){
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([document.getElementById('export').value],{type:'text/markdown'}));
+  a.download='问卷替代方案.md';a.click();};
 document.getElementById('to4b').onclick=function(){go(4);};
 document.getElementById('copyBtn').onclick=function(){
   var t=document.getElementById('export');t.select();
@@ -605,7 +830,7 @@ if(location.hash && location.hash.indexOf('step')>=0){
   var t=parseInt(location.hash.match(/step(\d)/)[1],10);
   if(t>=3)renderSurvey();
   if(t>=4)renderCompare();
-  if(t>=5)renderExport();
+  if(t>=5)renderDeliver();
   go(t);
 }
 </script>
