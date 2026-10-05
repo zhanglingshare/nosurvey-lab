@@ -7,6 +7,10 @@
 [![License: CC BY 4.0](https://img.shields.io/badge/docs%20%26%20data-CC%20BY%204.0-lightgrey.svg)](LICENSE-DOCS.md)
 [![Version](https://img.shields.io/badge/version-0.1.0-success.svg)](CHANGELOG.md)
 
+### ▶ 在线试用（浏览器直接运行，无需安装）
+
+**<https://zhanglingshare.github.io/nosurvey-lab/>** —— 打开后点“载入国潮案例 6 构念 → 开始判定”即可体验；纯前端、无后端、不上传数据。
+
 ## 为什么需要它
 
 量化论文默认“数据＝问卷”，但问卷有三类内容，替代难度完全不同：

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>问卷替代实验室 · 在线 Demo</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#171d26; --panel2:#1d2530; --line:#2a3340;
+    --ink:#e8edf2; --muted:#9aa7b4; --accent:#2bb3a3; --accent-dim:#1e7d72;
+    --S:#2fbf71; --A:#3a9bdc; --B:#e0a92e; --C:#e07b3a; --D:#d65454;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.6}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 18px 60px}
+  header h1{font-size:26px;margin:0 0 6px}
+  header .sub{color:var(--muted);font-size:15px;max-width:760px}
+  .badge{display:inline-block;font-size:12px;padding:2px 9px;border:1px solid var(--line);
+    border-radius:20px;color:var(--muted);margin:8px 6px 0 0}
+  .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;margin-top:24px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card h2{font-size:17px;margin:0 0 4px}
+  .card .hint{color:var(--muted);font-size:13px;margin:0 0 14px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  input[type=text]{flex:1;min-width:160px;background:var(--panel2);border:1px solid var(--line);
+    color:var(--ink);border-radius:9px;padding:10px 12px;font-size:14px}
+  select{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:9px;
+    padding:10px 10px;font-size:14px}
+  button{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink);
+    border-radius:9px;padding:10px 14px;font-size:14px}
+  button.primary{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff}
+  button.primary:hover{background:var(--accent)}
+  button.ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .quick{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+  .quick button{font-size:12.5px;padding:7px 11px;color:var(--muted)}
+  ul.queue{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:8px}
+  ul.queue li{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:9px;padding:8px 12px;font-size:14px}
+  ul.queue .t{font-size:11.5px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 7px}
+  ul.queue .del{margin-left:auto;color:var(--muted);cursor:pointer;border:none;background:none;font-size:15px}
+  .results{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+  .res{display:grid;grid-template-columns:54px 1fr;gap:12px;align-items:start;
+    background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 14px}
+  .lvl{width:48px;height:48px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+    font-size:24px;font-weight:700;color:#0d1117}
+  .lvl.S{background:var(--S)} .lvl.A{background:var(--A)} .lvl.B{background:var(--B)}
+  .lvl.C{background:var(--C)} .lvl.D{background:var(--D)}
+  .res .name{font-size:15px;font-weight:600}
+  .res .meta{font-size:12.5px;color:var(--muted)}
+  .res .why{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .statline{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
+  .stat{flex:1;min-width:90px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+    padding:10px;text-align:center}
+  .stat b{display:block;font-size:20px;color:var(--accent)}
+  .stat span{font-size:11.5px;color:var(--muted)}
+  .bars{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+  .bar{display:grid;grid-template-columns:78px 1fr 26px;align-items:center;gap:8px;font-size:11.5px;color:var(--muted)}
+  .bar .track{height:13px;background:var(--panel2);border-radius:6px;overflow:hidden}
+  .bar .fill{height:100%;background:linear-gradient(90deg,var(--accent-dim),var(--accent));border-radius:6px}
+  .bar.strong .fill{background:linear-gradient(90deg,#b3802e,#e0b24b)}
+  .dims{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+  .dim{flex:1;min-width:60px;text-align:center;background:var(--panel2);border:1px solid var(--line);
+    border-radius:9px;padding:8px 4px;font-size:11px;color:var(--muted)}
+  .dim b{display:block;font-size:15px;color:var(--ink)}
+  .note{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:18px;
+    font-size:13.5px;color:var(--muted)}
+  .note b{color:var(--ink)}
+  footer{margin-top:26px;font-size:12.5px;color:var(--muted);text-align:center}
+  a{color:var(--accent)}
+  .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .chip{font-size:11.5px;padding:2px 9px;border-radius:20px;color:#0d1117;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>问卷替代实验室 · 在线 Demo</h1>
+    <div class="sub">把问卷本来要拿的数据，用公开数据、数字痕迹、行政记录与文本语料替代。先判断“这个构念到底该不该发问卷”，再给可复现的取数方案。<b style="color:var(--accent)">本页完全在你的浏览器本地运行，无后端、不上传任何数据。</b></div>
+    <span class="badge">代码 MIT</span><span class="badge">文档/数据 CC BY 4.0</span>
+    <span class="badge">SRG v0.1.0</span><span class="badge">离线可跑</span>
+    <div class="legend">
+      <span class="chip" style="background:var(--S)">S 直接替代</span>
+      <span class="chip" style="background:var(--A)">A 高度可替代</span>
+      <span class="chip" style="background:var(--B)">B 需校准</span>
+      <span class="chip" style="background:var(--C)">C 三角验证</span>
+      <span class="chip" style="background:var(--D)">D 兜底</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- 交互分级器 -->
+    <section class="card">
+      <h2>SRG 替代度分级器</h2>
+      <p class="hint">输入构念名称，选择测量类型（事实/行为/心理），加入后点“开始判定”。逻辑与开源脚本 grade_construct.py 一致。</p>
+      <div class="row">
+        <input id="cname" type="text" placeholder="构念名称，如：购买意愿" />
+        <select id="ctype">
+          <option value="事实">事实性自报</option>
+          <option value="行为">行为性自报</option>
+          <option value="心理" selected>心理性自报</option>
+        </select>
+        <button class="ghost" id="addBtn">加入</button>
+      </div>
+      <div class="quick">
+        <button id="qGuochao">载入国潮案例 6 构念</button>
+        <button id="qSimple">载入简单示例</button>
+        <button id="clearBtn">清空</button>
+      </div>
+      <ul class="queue" id="queue"></ul>
+      <div class="row" style="margin-top:14px">
+        <button class="primary" id="runBtn">开始判定</button>
+      </div>
+      <div class="results" id="results"></div>
+    </section>
+
+    <!-- 国潮案例 -->
+    <section class="card">
+      <h2>真实案例：国潮服饰 GCS 客观编码</h2>
+      <p class="hint">16 件真实国潮 SKU，五维编码（纹样/工艺/版型/重构/密度），把“文化刺激”从感知题还原为可观测产品特征。</p>
+      <div class="statline">
+        <div class="stat"><b>10.5</b><span>总分均值</span></div>
+        <div class="stat"><b>14</b><span>最强单品</span></div>
+        <div class="stat"><b>13 / 3</b><span>强 / 极强</span></div>
+      </div>
+      <div class="bars" id="bars"></div>
+      <div class="dims">
+        <div class="dim"><b>2.38</b>纹样</div>
+        <div class="dim"><b>2.38</b>工艺</div>
+        <div class="dim"><b>1.69</b>版型</div>
+        <div class="dim"><b>2.12</b>重构</div>
+        <div class="dim"><b>1.94</b>密度</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="note">
+    <b>边界与说明</b><br>
+    • 分级是<b>初筛</b>：最终方案需匹配数据源并做效度论证（校准锚点 / 已发表文献 / 三角验证 / 稳健性）。<br>
+    • 心理类构念命中“购买/使用”等词会上调，但<b>意愿 ≠ 行为</b>，需校准或说明 gap；命中“心流/幸福感/私密”等会下调。<br>
+    • 本工具不预测未来；描述仿真/模型数据时区分“模型状态”与“现实事实”。第三方 SKU 原图受版权保护，未随项目分发。
+  </div>
+
+  <footer>
+    开源仓库：<a href="https://github.com/zhanglingshare/nosurvey-lab">github.com/zhanglingshare/nosurvey-lab</a>
+    &nbsp;·&nbsp; 问卷不应是数据来源的默认项，而是效度兜底项。
+  </footer>
+</div>
+
+<script>
+// ===== 与 grade_construct.py 对齐的规则 =====
+var TYPE_RULES = {事实:"S", 行为:"A", 心理:"B"};
+var UPGRADE = {
+  收入:"S",消费:"S",就业:"S",支出:"S",
+  使用:"A",参与:"A",互动:"A",购买:"A",时长:"A",频率:"A",行为:"A"
+};
+var DOWNGRADE = {
+  幸福感:"C",内在动机:"C",心流:"C",自我效能:"C",
+  私密:"D",性:"D",信仰:"D",深层:"C"
+};
+var STRATEGY = {
+  S:["直接替代","全网替代，问卷不推荐"],
+  A:["高度可替代","全网替代，问卷不推荐"],
+  B:["可替代·需校准","替代为主 + 小样本校准（100-300份效度锚点）"],
+  C:["部分替代·三角验证","多源三角（文本×行为×情境），问卷降级辅助"],
+  D:["兜底·实验/问卷","推荐行为实验任务替代自报"]
+};
+function grade(name, mtype){
+  var level = TYPE_RULES[mtype];
+  var notes = ["类型『"+mtype+"』基础级别 "+level];
+  if(mtype === "心理"){
+    for(var k in DOWNGRADE){ if(name.indexOf(k)>=0){ level=DOWNGRADE[k];
+      notes.push("命中难替代词『"+k+"』→ 下调至 "+level); return {level:level,notes:notes}; } }
+    for(var k2 in UPGRADE){ if(name.indexOf(k2)>=0){ level = UPGRADE[k2]==="S" ? "A" : UPGRADE[k2];
+      notes.push("命中行为代理词『"+k2+"』→ 上调至 "+level+"（意愿≠行为，需校准或说明 gap）");
+      return {level:level,notes:notes}; } }
+  } else {
+    for(var k3 in UPGRADE){ if(name.indexOf(k3)>=0){
+      var cand = UPGRADE[k3];
+      if(cand===mtype || cand==="S"){ if(cand!==level){level=cand;notes.push("命中可替代词『"+k3+"』→ 确认 "+level);} }
+      break; } }
+  }
+  return {level:level, notes:notes};
+}
+
+// ===== UI 逻辑 =====
+var queue = [];
+var queueEl = document.getElementById("queue");
+var resultsEl = document.getElementById("results");
+function renderQueue(){
+  queueEl.innerHTML = "";
+  queue.forEach(function(q,i){
+    var li=document.createElement("li");
+    li.innerHTML = "<span>"+q.name+"</span><span class='t'>"+q.type+"</span>";
+    var del=document.createElement("span"); del.className="del"; del.textContent="✕";
+    del.onclick=function(){queue.splice(i,1);renderQueue();};
+    li.appendChild(del); queueEl.appendChild(li);
+  });
+}
+function addConstruct(name,type){
+  if(!name){ return; }
+  queue.push({name:name, type:type}); renderQueue();
+}
+document.getElementById("addBtn").onclick=function(){
+  var n=document.getElementById("cname");
+  addConstruct(n.value.trim(), document.getElementById("ctype").value);
+  n.value=""; n.focus();
+};
+document.getElementById("cname").addEventListener("keydown",function(e){
+  if(e.key==="Enter"){document.getElementById("addBtn").click();}
+});
+document.getElementById("clearBtn").onclick=function(){queue=[];resultsEl.innerHTML="";renderQueue();};
+document.getElementById("runBtn").onclick=function(){
+  resultsEl.innerHTML="";
+  if(queue.length===0){resultsEl.innerHTML="<p class='hint'>请先加入至少一个构念。</p>";return;}
+  queue.forEach(function(q){
+    var r=grade(q.name,q.type), s=STRATEGY[r.level];
+    var div=document.createElement("div"); div.className="res";
+    div.innerHTML =
+      "<div class='lvl "+r.level+"'>"+r.level+"</div>"+
+      "<div><div class='name'>"+q.name+"</div>"+
+      "<div class='meta'>"+r.level+"级 · "+s[0]+" ｜ 策略："+s[1]+"</div>"+
+      "<div class='why'>"+r.notes.join("；")+"</div></div>";
+    resultsEl.appendChild(div);
+  });
+};
+document.getElementById("qSimple").onclick=function(){
+  queue=[{name:"收入水平",type:"事实"},{name:"使用强度",type:"行为"},{name:"工作满意度",type:"心理"}];
+  renderQueue(); document.getElementById("runBtn").click();
+};
+document.getElementById("qGuochao").onclick=function(){
+  queue=[
+    {name:"国潮文化刺激",type:"事实"},
+    {name:"文化认同",type:"心理"},
+    {name:"自我品牌连接",type:"心理"},
+    {name:"感知价值",type:"心理"},
+    {name:"品牌情感",type:"心理"},
+    {name:"购买意愿",type:"心理"}
+  ];
+  renderQueue(); document.getElementById("runBtn").click();
+};
+
+// ===== 国潮 GCS 条形图（16件，总分） =====
+var gcs=[
+ ["01 白龙T恤",10],["02 青花T恤",11],["03 苗彝T恤",8],["04 中国龙T恤",11],
+ ["05 牡丹短裤",9],["06 琵琶卫衣",10],["07 团龙卫衣",11],["08 牡丹卫衣",10],
+ ["09 凤凰卫衣",9],["10 凤尾卫衣",10],["11 如意唐装",11],["12 老绣长袍",13],
+ ["13 锦鲤外套",9],["14 仙鹤马面",14],["15 山水马面",8],["16 伎乐马面",14]
+];
+var barsEl=document.getElementById("bars");
+gcs.forEach(function(g){
+  var row=document.createElement("div");
+  row.className="bar"+(g[1]>=13?" strong":"");
+  row.innerHTML="<span>"+g[0]+"</span><div class='track'><div class='fill' style='width:"+
+    (g[1]/14*100)+"%'></div></div><span>"+g[1]+"</span>";
+  barsEl.appendChild(row);
+});
+
+// 支持 #auto：打开即自动载入并判定国潮案例（便于直接分享演示）
+if(location.hash && location.hash.indexOf("auto")>=0){
+  document.getElementById("qGuochao").click();
+}
+</script>
+</body>
+</html>
