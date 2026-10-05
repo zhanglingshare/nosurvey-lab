@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this work in a paper or project, please cite it."
+title: "No-Survey Lab: A decision engine to replace questionnaires with public data and digital traces"
+version: 0.1.0
+date-released: 2026-10-05
+authors:
+  - alias: zhanglingshare
+repository-code: https://github.com/zhanglingshare/nosurvey-lab
+url: https://github.com/zhanglingshare/nosurvey-lab
+license:
+  - MIT
+  - CC-BY-4.0
+keywords:
+  - questionnaire
+  - computational social science
+  - digital traces
+  - open data
+  - research methods
+  - PLS-SEM
+  - content analysis
+# TODO(维护者): 补真实姓名（given-names/family-names）与 Zenodo DOI（identifiers:）

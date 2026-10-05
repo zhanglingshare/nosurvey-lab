@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 系统/编辑器
+.DS_Store
+.idea/
+.vscode/
+
+# 第三方 SKU 原图（受版权，不随仓库分发；按 sources.md 自行获取）
+examples/guochao-sbc/assets/sku_images/*.jpg
+examples/guochao-sbc/assets/sku_images/*.jpeg
+examples/guochao-sbc/assets/sku_images/*.png
+examples/guochao-sbc/assets/sku_images/*.webp
+!examples/guochao-sbc/assets/sku_images/README.md
+
+# 临时/敏感
+*.tmp
+*.token
+.env
