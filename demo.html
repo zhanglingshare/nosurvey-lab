@@ -3,87 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>问卷替代实验室 · 自动演示</title>
+<title>研究生科研助手 · 自动演示（No-Survey Lab）</title>
 <style>
   :root{
-    --bg:#0f1419;--panel:#171d26;--panel2:#1d2530;--line:#2a3340;
-    --ink:#e8edf2;--muted:#9aa7b4;--accent:#2bb3a3;--accent-dim:#1e7d72;
-    --S:#2fbf71;--A:#3a9bdc;--B:#e0a92e;--C:#e07b3a;--D:#d65454;
+    --bg:#f3f2ee;--panel:#ffffff;--panel2:#f7f6f2;--line:#e7e4dc;--line-strong:#d4d0c5;
+    --ink:#20242b;--muted:#79808b;
+    --accent:#0f766e;--accent-soft:#d8f0ec;
+    --S:#059669;--S-bg:#d3f5e5;--A:#0284c7;--A-bg:#dff1fc;
+    --B:#c2780a;--B-bg:#fbf0d4;--C:#e06512;--C-bg:#fdebd6;--D:#dc2626;--D-bg:#fde2e2;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6}
+  body::before{content:"";position:fixed;top:-180px;left:50%;transform:translateX(-50%);
+    width:1100px;height:420px;background:radial-gradient(closest-side,rgba(15,118,110,.12),transparent);pointer-events:none;z-index:0}
   #progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50;transition:width .3s linear}
-  .wrap{max-width:920px;margin:0 auto;padding:24px 16px 60px}
+  .wrap{max-width:920px;margin:0 auto;padding:26px 16px 60px;position:relative;z-index:1}
   header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
-  header h1{font-size:22px;margin:0 0 4px}
-  header .sub{color:var(--muted);font-size:13.5px;max-width:680px}
+  header h1{font-size:22px;margin:0 0 5px;letter-spacing:-.02em}
+  header h1 .mk{display:inline-block;width:13px;height:22px;background:var(--accent);border-radius:4px;margin-right:9px;vertical-align:-3px}
+  header .sub{color:var(--muted);font-size:13.5px;max-width:700px}
   header .sub b{color:var(--accent)}
-  .replay{font-size:12.5px;padding:7px 12px}
-  .steps{display:flex;gap:6px;margin:18px 0 16px;flex-wrap:wrap}
-  .step{flex:1;min-width:60px;text-align:center;font-size:12px;color:var(--muted);
-    border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:7px 4px;transition:.3s}
-  .step.active{color:#fff;border-color:var(--accent-dim);background:var(--accent-dim)}
-  .step.done{color:var(--accent);border-color:var(--accent-dim)}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;display:none;animation:fade .4s}
+  .replay{font-size:12.5px;padding:8px 13px;border-radius:9px}
+  .steps{display:flex;gap:7px;margin:20px 0 18px;flex-wrap:wrap}
+  .step{flex:1;min-width:64px;text-align:center;font-size:12px;color:var(--muted);
+    border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 4px;transition:.3s}
+  .step.active{color:#fff;border-color:var(--accent);background:var(--accent)}
+  .step.done{color:var(--accent);border-color:var(--accent-soft);background:var(--accent-soft)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;display:none;
+    animation:fade .45s;box-shadow:0 10px 30px rgba(30,35,42,.05)}
   .card.show{display:block}
-  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  .card h2{font-size:18px;margin:0 0 4px}
-  .hint{color:var(--muted);font-size:13px;margin:0 0 14px}
-  textarea{width:100%;min-height:160px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
-    border-radius:10px;padding:13px;font-size:14px;resize:none;font-family:inherit}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .card h2{font-size:18px;margin:0 0 4px;letter-spacing:-.01em}
+  .hint{color:var(--muted);font-size:13px;margin:0 0 16px}
+  textarea{width:100%;min-height:150px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    border-radius:12px;padding:14px;font-size:14px;resize:none;font-family:inherit}
   .caret{display:inline-block;width:8px;height:16px;background:var(--accent);animation:blink .8s steps(1) infinite;vertical-align:-2px}
   @keyframes blink{50%{opacity:0}}
-  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;justify-content:flex-end}
-  button{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink);
-    border-radius:9px;padding:10px 15px;font-size:14px}
-  button.primary{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff}
-  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(43,179,163,.55)}50%{box-shadow:0 0 0 8px rgba(43,179,163,0)}}
-  .pulse{animation:pulse 1s ease-in-out infinite}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .chip{font-size:12px;color:var(--muted);background:var(--panel2);border:1px solid var(--line);
+    border-radius:20px;padding:4px 12px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;justify-content:flex-end}
+  button{cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);
+    border-radius:10px;padding:10px 16px;font-size:14px}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(15,118,110,.4)}50%{box-shadow:0 0 0 9px rgba(15,118,110,0)}}
+  .pulse{animation:pulse 1.1s ease-in-out infinite}
+  .section-t{font-size:12.5px;color:var(--muted);margin:18px 0 9px;letter-spacing:.4px;font-weight:600}
   .list{display:flex;flex-direction:column;gap:9px}
-  .node{display:flex;align-items:center;gap:9px;background:var(--panel2);border:1px solid var(--line);
-    border-radius:10px;padding:9px 12px;opacity:0;transform:translateX(-10px);transition:.35s}
+  .node{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:11px;padding:9px 13px;opacity:0;transform:translateX(-12px);transition:.4s}
   .node.in{opacity:1;transform:none}
-  .node .nm{flex:1;font-size:14px}
-  .tag{font-size:11.5px;padding:2px 9px;border-radius:7px;border:1px solid var(--line);color:var(--muted)}
-  .rels{display:flex;flex-direction:column;gap:7px;margin-top:16px}
-  .rel{display:flex;align-items:center;gap:8px;font-size:13.5px;background:var(--panel2);
-    border:1px solid var(--line);border-radius:9px;padding:8px 12px;flex-wrap:wrap;opacity:0;transition:.3s}
+  .node .nm{flex:1;font-size:14px;font-weight:600}
+  .tag{font-size:11.5px;padding:2.5px 10px;border-radius:7px;border:1px solid var(--line);color:var(--muted);background:var(--panel)}
+  .rb{font-size:11px;font-weight:700;padding:2.5px 9px;border-radius:7px}
+  .rels{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .rel{display:flex;align-items:center;gap:9px;font-size:13.5px;background:var(--panel2);
+    border:1px solid var(--line);border-radius:10px;padding:9px 13px;flex-wrap:wrap;opacity:0;transition:.35s}
   .rel.in{opacity:1}
-  .arrow{font-weight:700}
-  .arrow.pos{color:var(--S)}.arrow.neg{color:var(--D)}
-  .section-t{font-size:13px;color:var(--muted);margin:18px 0 8px;letter-spacing:.5px}
-  .qgrp{opacity:0;transition:.3s;margin-bottom:10px}
+  .arrow{font-weight:700;color:var(--S)}
+  .qgrp{opacity:0;transition:.35s;margin-bottom:12px}
   .qgrp.in{opacity:1}
-  .qitem{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 13px;
-    font-size:13.5px;margin-bottom:6px;opacity:0;transform:translateY(6px);transition:.3s}
-  .qitem.in{opacity:1;transform:none}
-  .scale{font-size:12.5px;color:var(--muted);margin-top:8px;opacity:0;transition:.4s}
-  .scale.in{opacity:1}
-  .big{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-  .kpi{flex:1;min-width:120px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
-  .kpi b{display:block;font-size:26px;color:var(--accent)}
+  .qgrp .gt{font-size:13px;font-weight:700;margin:2px 0 7px}
+  .qitem{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:13.5px}
+  .qitem .g{font-size:12.5px;margin-bottom:5px}
+  .qitem .g b{color:var(--accent)}
+  .qitem .src{color:var(--muted);font-size:12px;margin-bottom:8px;line-height:1.6}
+  .qitem .q{margin:3px 0}
+  .qitem .note{color:var(--muted);font-size:11.5px;margin-top:8px}
+  .big{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .kpi{flex:1;min-width:120px;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:15px;text-align:center}
+  .kpi b{display:block;font-size:26px;color:var(--accent);letter-spacing:-.02em}
   .kpi span{font-size:12px;color:var(--muted)}
-  .cmp{display:flex;flex-direction:column;gap:8px}
-  .crow{display:grid;grid-template-columns:44px 1fr;gap:11px;background:var(--panel2);border:1px solid var(--line);
-    border-radius:11px;padding:11px 13px;opacity:0;transform:translateY(8px);transition:.35s}
+  .cmp{display:flex;flex-direction:column;gap:9px}
+  .crow{display:grid;grid-template-columns:46px 1fr;gap:12px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;opacity:0;transform:translateY(9px);transition:.4s}
   .crow.in{opacity:1;transform:none}
-  .lv{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-    font-size:19px;font-weight:700;color:#0d1117}
-  .lv.S{background:var(--S)}.lv.A{background:var(--A)}.lv.B{background:var(--B)}.lv.C{background:var(--C)}.lv.D{background:var(--D)}
-  .crow .n{font-size:14px;font-weight:600}
+  .lv{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    font-size:19px;font-weight:800}
+  .lv.S{background:var(--S-bg);color:var(--S)}.lv.A{background:var(--A-bg);color:var(--A)}
+  .lv.B{background:var(--B-bg);color:var(--B)}.lv.C{background:var(--C-bg);color:var(--C)}.lv.D{background:var(--D-bg);color:var(--D)}
+  .crow .n{font-size:14px;font-weight:700}
   .crow .old{font-size:12px;color:var(--muted)}
   .crow .nw{font-size:12.5px;margin-top:2px}
-  .end{text-align:center;padding:34px 20px}
-  .end h2{font-size:22px;margin:0 0 10px}
-  .end p{color:var(--muted);font-size:14px;max-width:600px;margin:0 auto 18px}
-  .end .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-  .end a{text-decoration:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);
+  /* 交付仪表盘 */
+  .dsec{margin-top:26px}
+  .dsec-h{font-size:14px;font-weight:700;margin-bottom:12px}
+  .graph{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:10px}
+  .graph svg{display:block;width:100%;height:auto}
+  .gnode{cursor:grab}.gnode:active{cursor:grabbing}
+  .gnode rect.bg{fill:#fff;stroke-width:1.6}
+  .gnode text{pointer-events:none}
+  .gnode .nm-t{font-size:12.5px;fill:var(--ink);font-weight:600}
+  .gnode .role-t{font-size:9.5px;font-weight:700}
+  .edge{fill:none;stroke-width:1.9;opacity:.75}
+  .edge.dim{opacity:.16}.edge.hl{opacity:1;stroke-width:2.6}
+  .pipe{display:flex;align-items:stretch}
+  .pcard{flex:1;min-width:190px;border:1px solid var(--line);border-radius:14px;padding:15px;background:var(--panel)}
+  .pcard h4{margin:0 0 8px;font-size:13.5px;display:flex;align-items:center}
+  .pnum{display:inline-flex;width:21px;height:21px;border-radius:7px;background:var(--accent);color:#fff;
+    align-items:center;justify-content:center;font-size:11px;margin-right:8px;flex:none}
+  .pcard ul{margin:0;padding-left:18px;font-size:12.5px;color:#3f4650}
+  .pcard li{margin:3.5px 0}
+  .parrow{display:flex;align-items:center;color:var(--line-strong);font-size:20px;padding:0 9px}
+  .endcta{text-align:center;margin-top:28px;padding-top:22px;border-top:1px solid var(--line)}
+  .endcta h2{font-size:20px;margin:0 0 8px}
+  .endcta p{color:var(--muted);font-size:13.5px;max-width:620px;margin:0 auto 16px}
+  .endcta .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .endcta a{text-decoration:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);
     border-radius:10px;padding:11px 18px;font-size:14px}
-  .end a.solid{background:var(--accent-dim);border-color:var(--accent-dim);color:#fff}
-  .end .feats{margin:18px 0 6px;font-size:13px;color:var(--muted)}
+  .endcta a.solid{background:var(--accent);border-color:var(--accent);color:#fff}
+  .feats{margin:16px 0 4px;font-size:12.5px;color:var(--muted)}
+  .disclaimer{margin-top:16px;font-size:11.5px;color:var(--muted);text-align:center}
   footer{margin-top:24px;font-size:12.5px;color:var(--muted);text-align:center}
-  a.txt{color:var(--accent)}
+  @media(max-width:680px){.pipe{flex-direction:column}.parrow{transform:rotate(90deg);padding:7px 0;align-self:center}}
 </style>
 </head>
 <body>
@@ -91,8 +124,8 @@
 <div class="wrap">
   <header>
     <div>
-      <h1>问卷替代实验室 · 自动演示</h1>
-      <div class="sub">无需操作，自动演完“<b>输入 → 拆解 → 问卷设计 → 新方法替代 → 导出</b>”全程；引擎与交互版完全一致，数据不出你浏览器。</div>
+      <h1><span class="mk"></span>研究生科研助手 · 自动演示</h1>
+      <div class="sub">无需操作，自动演完“<b>输入 → 拆解 → 带来源问卷 → 新方法替代 → 交付仪表盘</b>”全程；引擎与交互版完全一致，纯前端、数据不出你浏览器。</div>
     </div>
     <button class="replay" id="replayBtn">↻ 重新播放</button>
   </header>
@@ -102,55 +135,81 @@
     <div class="step" data-s="2">2 拆解</div>
     <div class="step" data-s="3">3 问卷设计</div>
     <div class="step" data-s="4">4 新方法替代</div>
-    <div class="step" data-s="5">5 完成</div>
+    <div class="step" data-s="5">5 交付</div>
   </div>
 
   <section class="card" id="c1">
-    <h2>把研究丢进来</h2>
-    <p class="hint">正在自动输入一份研究假设……</p>
+    <h2>把你的研究丢进来</h2>
+    <p class="hint">正在自动输入一段研究假设……</p>
+    <div class="chips">
+      <span class="chip">支持粘贴假设文字</span><span class="chip">读取 .docx / .txt / .md</span><span class="chip">概念图 OCR 识别</span>
+    </div>
     <textarea id="raw" readonly></textarea>
     <div class="row"><button class="primary" id="b1">立即拆解 →</button></div>
   </section>
 
   <section class="card" id="c2">
-    <h2>拆解结果</h2>
-    <p class="hint">自动识别构念、测量类型与关系方向。</p>
+    <h2>自动拆解：构念、角色与关系</h2>
+    <p class="hint">按网络位置推断角色（自变量 / 中介 / 因变量），标注测量类型与关系方向。</p>
     <div class="section-t">构念清单</div>
     <div class="list" id="nodeList"></div>
     <div class="section-t">关系（假设）</div>
     <div class="rels" id="relList"></div>
-    <div class="row"><button class="primary" id="b2">生成问卷设计 →</button></div>
+    <div class="row"><button class="primary" id="b2">生成带来源问卷 →</button></div>
   </section>
 
   <section class="card" id="c3">
-    <h2>传统做法：你需要这样一份问卷</h2>
-    <p class="hint">每个构念的 Likert 示例题（5 级），正式研究请引用成熟量表。</p>
+    <h2>问卷设计：每个构念都有成熟量表来源</h2>
+    <p class="hint">自动匹配经典量表，标注开发者、年份与出处期刊，题项可追溯。</p>
     <div id="surveyBox"></div>
-    <div class="scale" id="scaleNote">计分：1 非常不同意 — 5 非常同意；另需人口统计题。</div>
     <div class="row"><button class="primary" id="b3">看新方法如何替代 →</button></div>
   </section>
 
   <section class="card" id="c4">
     <h2>新方法：能少发多少问卷</h2>
-    <p class="hint">S/A 可零问卷，B 仅需少量效度锚点。</p>
+    <p class="hint">S/A 级可零问卷，B 级仅需 100–300 份效度锚点。</p>
     <div class="big">
       <div class="kpi"><b id="kZero">0%</b><span>可零问卷构念占比（S+A）</span></div>
       <div class="kpi"><b id="kOld">0</b><span>传统问卷题数（约）</span></div>
       <div class="kpi"><b id="kAnchor">0</b><span>需效度锚点（B级构念）</span></div>
     </div>
     <div class="cmp" id="cmpBox"></div>
-    <div class="row"><button class="primary" id="b4">生成可复制方案 →</button></div>
+    <div class="row"><button class="primary" id="b4">生成交付仪表盘 →</button></div>
   </section>
 
   <section class="card" id="c5">
-    <div class="end">
-      <h2>完成。问卷是效度兜底项，不是默认项</h2>
-      <p id="endSummary">同一套研究，主效应里的构念可用公开数据与数字痕迹观测，仅少数心理构念需要效度锚点。</p>
+    <h2>你的研究方案</h2>
+    <p class="hint">概念模型、构念与量表来源、分析路径一屏总览；模型图可拖拽节点重新布局。</p>
+    <div class="big" id="dKpis"></div>
+
+    <div class="dsec">
+      <div class="dsec-h">概念模型（节点可拖拽）</div>
+      <div class="graph" id="graph"></div>
+    </div>
+
+    <div class="dsec">
+      <div class="dsec-h">数据分析路径（聚焦，不堆砌软件）</div>
+      <div class="pipe">
+        <div class="pcard"><h4><span class="pnum">1</span>数据整理</h4>
+          <ul><li>回收与清洗</li><li>编码与反向题处理</li><li>缺失值处理</li></ul></div>
+        <div class="parrow">→</div>
+        <div class="pcard"><h4><span class="pnum">2</span>SPSS · 描述与信度</h4>
+          <ul><li>描述性统计（特征/均值/标准差）</li><li>信度 Cronbach’s α</li><li>相关分析</li><li>共同方法偏差 Harman 单因子</li></ul></div>
+        <div class="parrow">→</div>
+        <div class="pcard"><h4><span class="pnum">3</span>SmartPLS · PLS-SEM</h4>
+          <ul><li>测量模型：载荷、CR、AVE</li><li>区别效度 HTMT / Fornell–Larcker</li><li>结构模型：β、R²、f²、Q²</li><li>5000 次 bootstrap 检验假设</li></ul></div>
+      </div>
+    </div>
+
+    <div class="endcta">
+      <h2>问卷是效度兜底项，不是默认项</h2>
+      <p id="endSummary">同一套研究：可零问卷构念 33%，仅少数心理构念需效度锚点；概念模型与分析路径已就绪。</p>
       <div class="feats">单文件 · 浏览器直接跑 · 断网可用 · 数据不上传 · 免费开源</div>
       <div class="cta">
         <a class="solid" href="index.html">亲手试试（交互版）</a>
         <a href="https://github.com/zhanglingshare/nosurvey-lab">开源仓库</a>
       </div>
+      <div class="disclaimer">工具输出为特定参数下的相对推演、非预测值，不构成投资或经营建议。</div>
     </div>
   </section>
 
@@ -171,12 +230,12 @@ var ALTROUTE={
 function grade(name,mtype){
   var level=TYPE_RULES[mtype],notes=[];
   if(mtype==="心理"){
-    for(var k in DOWNGRADE){if(name.indexOf(k)>=0)return {level:DOWNGRADE[k],notes:notes};}
-    for(var k2 in UPGRADE){if(name.indexOf(k2)>=0)return {level:UPGRADE[k2]==="S"?"A":UPGRADE[k2],notes:notes};}
+    for(var k in DOWNGRADE){if(name.indexOf(k)>=0)return{level:DOWNGRADE[k],notes:notes};}
+    for(var k2 in UPGRADE){if(name.indexOf(k2)>=0)return{level:UPGRADE[k2]==="S"?"A":UPGRADE[k2],notes:notes};}
   }else{
     for(var k3 in UPGRADE){if(name.indexOf(k3)>=0){var c=UPGRADE[k3];if(c===mtype||c==="S")level=c;break;}}
   }
-  return {level:level,notes:notes};
+  return{level:level,notes:notes};
 }
 var POS=['显著正向影响','正向作用于','正向预测','正向影响','正相关','积极影响','促进','提升','增加','增强','有助于','正向'];
 var NEG=['负向作用于','负向预测','负向影响','负相关','抑制','降低','削弱','减少','负向'];
@@ -197,19 +256,152 @@ var PSY=['意愿','情感','认同','满意','感知','态度','信任','依恋'
 var FACT=['收入','价格','成本','产量','销量','数量','年龄','性别','规模','投资','产值','人数','学历','刺激','特征','属性'];
 var BEH=['使用','参与','互动','时长','频次','频率','复购','点击','停留','浏览','消费','购买'];
 function inferType(name){
-  for(var i=0;i<PSY.length;i++)if(name.indexOf(PSY[i])>=0)return '心理';
-  for(var j=0;j<FACT.length;j++)if(name.indexOf(FACT[j])>=0)return '事实';
-  for(var k=0;k<BEH.length;k++)if(name.indexOf(BEH[k])>=0)return '行为';
-  return '心理';
+  for(var i=0;i<PSY.length;i++)if(name.indexOf(PSY[i])>=0)return'心理';
+  for(var j=0;j<FACT.length;j++)if(name.indexOf(FACT[j])>=0)return'事实';
+  for(var k=0;k<BEH.length;k++)if(name.indexOf(BEH[k])>=0)return'行为';
+  return'心理';
 }
-function surveyQuestions(name){
-  if(name.indexOf('意愿')>=0||name.indexOf('倾向')>=0)
-    return ["我愿意基于“"+name+"”采取相应行动","我会考虑在近期围绕“"+name+"”做出选择","我计划在未来一段时间内落实相关行为"];
-  return ["我认为“"+name+"”处于较高水平","在相关情境中，我能明显感受到“"+name+"”","总体而言，我对“"+name+"”持正面评价"];
+function computeRoles(){
+  nodes.forEach(function(nd){var ind=0,out=0;
+    rels.forEach(function(r){if(r.b===nd.name)ind++;if(r.a===nd.name)out++;});
+    if(out>0&&ind===0)nd.role='自变量';
+    else if(ind>0&&out===0)nd.role='因变量';
+    else if(ind>0&&out>0)nd.role='中介';
+    else nd.role=nd.role||'待定位';});
 }
-var RAW="国潮文化刺激 正向影响 自我品牌连接；文化认同 正向影响 自我品牌连接；自我品牌连接 正向影响 购买意愿；文化认同 正向影响 购买意愿；感知价值 正向影响 购买意愿；品牌情感 正向影响 购买意愿。";
+
+// ===== 成熟量表来源库 =====
+var SCALES=[
+ {k:['购买意愿','购买意向','购买倾向'],n:'购买意愿量表',c:'Dodds, Monroe & Grewal (1991), Journal of Marketing Research',
+  i:['我购买该产品的可能性很高','我愿意考虑购买该产品','我计划在近期购买该产品']},
+ {k:['自我品牌连接','自我-品牌连接','品牌连接','自我连接'],n:'自我-品牌连接量表（SBC）',c:'Escalas & Bettman (2003), JCR；Escalas (2004), JCR',
+  i:['该品牌反映了我是谁','我觉得自己与该品牌存在个人联系','该品牌能帮助我表达我的个性']},
+ {k:['文化认同','文化身份','民族认同','本土认同'],n:'文化认同量表',c:'Cleveland & Laroche (2007), Journal of Business Research（按情境改编）',
+  i:['我认同本土文化的价值观念','我觉得自己与本土文化有很强的联系','我愿意参与本土文化相关的活动']},
+ {k:['感知价值','顾客价值','价值感知'],n:'PERVAL 感知价值量表',c:'Sweeney & Soutar (2001), Journal of Retailing（质量/情感/社会/价格四维）',
+  i:['该产品物有所值','该产品具有可接受的一致质量','该产品能给我带来良好的感受']},
+ {k:['品牌情感','品牌情绪','品牌喜爱'],n:'品牌情感量表',c:'Chaudhuri & Holbrook (2001), Journal of Marketing',
+  i:['该品牌让我感觉良好','该品牌会给我带来愉悦','我对该品牌有正面的感情']},
+ {k:['文化刺激','国潮','文化元素','客观文化','纹样','文化要素'],n:'（无统一成熟量表）',c:'构念较新，学界无统一量表',i:[],special:'gcs'},
+ {k:['满意度','满意感'],n:'顾客满意度量表',c:'Oliver (1980)；Westbrook & Oliver (1991)',
+  i:['我对该产品（服务）感到满意','它的表现符合我的预期','总体而言，我对它是满意的']},
+ {k:['信任','信赖'],n:'信任量表',c:'Morgan & Hunt (1994), Journal of Marketing',
+  i:['我认为该品牌是可靠的','我信任该品牌','我相信该品牌会信守承诺']},
+ {k:['品牌依恋','情感依恋','依恋'],n:'品牌依恋量表',c:'Thomson, MacInnis & Park (2005), Journal of Marketing',
+  i:['我对该品牌有依恋感','该品牌对我有特殊意义','若不能再使用该品牌，我会感到失落']},
+ {k:['态度'],n:'品牌态度量表',c:'Mitchell & Olson (1981)；Fishbein & Ajzen',
+  i:['我对该产品持正面态度','我认为该产品是好的','我喜欢该产品']},
+ {k:['感知有用','有用性'],n:'感知有用性量表',c:'Davis (1989), MIS Quarterly（TAM）',
+  i:['使用它能提高我的效率','它对我而言是有用的','它让我更便捷地完成任务']},
+ {k:['感知易用','易用性'],n:'感知易用性量表',c:'Davis (1989), MIS Quarterly（TAM）',
+  i:['学习使用它对我来说很容易','它的操作清晰易懂','我能够熟练地使用它']},
+ {k:['持续使用','继续使用','使用意愿','采纳意愿'],n:'持续使用意愿量表',c:'Bhattacherjee (2001), MIS Quarterly',
+  i:['我打算继续使用它','我愿意在今后经常使用它','我会推荐他人使用它']},
+ {k:['行为意愿','行为意向'],n:'行为意愿量表',c:'Ajzen (1991), OBHDP（计划行为理论 TPB）',
+  i:['我有意愿去实施该行为','我会尝试去实施该行为','我计划在未来实施该行为']},
+ {k:['主观规范','规范信念'],n:'主观规范量表',c:'Ajzen (1991)（TPB）',
+  i:['对我重要的人认为我应该这么做','我看重其看法的人希望我这么做','我会参考重要他人的意见']},
+ {k:['感知行为控制','行为控制'],n:'感知行为控制量表',c:'Ajzen (1991)（TPB）',
+  i:['我有能力实施该行为','我具备实施该行为的资源与条件','是否实施该行为完全在我掌控中']},
+ {k:['忠诚度','品牌忠诚','复购意愿','忠诚'],n:'品牌忠诚量表',c:'Chaudhuri & Holbrook (2001)；Yoo & Donthu (2001)',
+  i:['下次购买时我会优先选择该品牌','我会持续重复购买该品牌','即使有竞争品牌，我仍选择它']},
+ {k:['心流','沉浸','流畅体验'],n:'心流体验量表',c:'Novak, Hoffman & Yung (2000), Marketing Science',
+  i:['使用时我会全神贯注','我感觉时间过得很快','我完全投入其中']},
+ {k:['自我效能','效能感'],n:'一般自我效能感量表',c:'Schwarzer & Jerusalem；参 Bandura',
+  i:['我相信自己有能力应对问题','遇到困难时我能找到解决办法','即使出现意外，我也能妥善处理']},
+ {k:['内在动机','内部动机'],n:'内在动机量表',c:'Deci & Ryan；Vallerand',
+  i:['我是因为兴趣而做这件事','做这件事的过程本身让我愉快','即使没有外部奖励，我也愿意做']}
+];
+function matchScale(name){
+  for(var x=0;x<SCALES.length;x++)for(var y=0;y<SCALES[x].k.length;y++)
+    if(name.indexOf(SCALES[x].k[y])>=0)return SCALES[x];
+  return null;
+}
+
+// ===== 网络图 =====
+var NW=150,NH=52,GW=900,graphPos=null;
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function wrapName(name){var m=8;
+  if(name.length<=m)return[name];
+  if(name.length<=m*2)return[name.slice(0,m),name.slice(m)];
+  return[name.slice(0,m),name.slice(m,m*2-1)+'…'];}
+function roleColor(r){return{自变量:'#0f766e',中介:'#0284c7',因变量:'#334155',调节:'#c2780a',控制:'#94a3b8',待定位:'#9aa1ab'}[r]||'#9aa1ab';}
+function srgColors(lv){return{S:['#d3f5e5','#059669'],A:['#dff1fc','#0284c7'],B:['#fbf0d4','#c2780a'],C:['#fdebd6','#e06512'],D:['#fde2e2','#dc2626']}[lv];}
+function layoutGraph(){
+  var indeg={},outdeg={};nodes.forEach(n=>{indeg[n.name]=0;outdeg[n.name]=0;});
+  rels.forEach(r=>{indeg[r.b]++;outdeg[r.a]++;});
+  var layer={},queue=[];nodes.forEach(n=>{if(indeg[n.name]===0){layer[n.name]=0;queue.push(n.name);}});
+  var rem=rels.slice(),guard=0;
+  while(rem.length&&guard<1200){guard++;var prog=false;
+    for(var i=rem.length-1;i>=0;i--){var r=rem[i];
+      if(layer[r.a]!==undefined){layer[r.b]=Math.max(layer[r.b]===undefined?-1:layer[r.b],layer[r.a]+1);
+        rem.splice(i,1);prog=true;}}
+    if(!prog)break;}
+  nodes.forEach(n=>{if(layer[n.name]===undefined)layer[n.name]=0;});
+  var maxL=0;nodes.forEach(n=>{maxL=Math.max(maxL,layer[n.name]);});
+  var specials=[];nodes.forEach(n=>{if(n.role==='调节'||n.role==='控制')specials.push(n.name);});
+  nodes.forEach(n=>{if(specials.indexOf(n.name)<0){
+    if(n.role==='自变量')layer[n.name]=0;
+    if(n.role==='因变量')layer[n.name]=Math.max(maxL,1);}});
+  maxL=0;nodes.forEach(n=>{if(specials.indexOf(n.name)<0)maxL=Math.max(maxL,layer[n.name]);});
+  var cols={};for(var l=0;l<=maxL;l++)cols[l]=[];
+  nodes.forEach(n=>{if(specials.indexOf(n.name)<0)cols[layer[n.name]].push(n.name);});
+  var padX=120,colW=maxL===0?0:(GW-2*padX)/maxL,pos={};
+  for(var ll=0;ll<=maxL;ll++){var arr=cols[ll];
+    var x=maxL===0?GW/2-NW/2:padX+ll*colW-NW/2;
+    arr.forEach((nm,i)=>{pos[nm]={x:x,y:62+i*(NH+44)};});}
+  var rows=0;for(var q=0;q<=maxL;q++)rows=Math.max(rows,cols[q].length);
+  var topH=62+rows*(NH+44)+8;
+  var sy=topH+16,step=specials.length?(GW-40)/specials.length:0;
+  specials.forEach((nm,i)=>{pos[nm]={x:20+i*step,y:sy};});
+  var H=topH+(specials.length?NH+42:30);
+  return{pos:pos,W:GW,H:H};
+}
+function edgeD(a,b,pos){var p=pos[a],q=pos[b];
+  var ax=p.x+NW/2,ay=p.y+NH/2,bx=q.x+NW/2,by=q.y+NH/2;
+  if(Math.abs(bx-ax)<NW*0.85){var up=by>ay;
+    if(up)return"M"+ax+" "+(p.y+NH)+" C"+ax+" "+(p.y+NH+32)+","+bx+" "+(q.y-32)+","+bx+" "+q.y;
+    return"M"+ax+" "+p.y+" C"+ax+" "+(p.y-32)+","+bx+" "+(q.y+NH+32)+","+bx+" "+(q.y+NH);}
+  var right=bx>ax,sxp=right?p.x+NW:p.x,syp=ay,exp=right?q.x:q.x+NW,eyp=by;
+  var dx=Math.max(32,Math.abs(exp-sxp)/2),sgn=right?1:-1;
+  return"M"+sxp+" "+syp+" C"+(sxp+sgn*dx)+" "+syp+","+(exp-sgn*dx)+" "+eyp+","+exp+" "+eyp;}
+function buildGraph(){
+  var L=layoutGraph();graphPos=L.pos;
+  var svg="<svg viewBox='0 0 "+L.W+" "+L.H+"' xmlns='http://www.w3.org/2000/svg'><defs>"+
+   "<marker id='arp' markerWidth='9' markerHeight='9' refX='7.5' refY='3' orient='auto' markerUnits='userSpaceOnUse'><path d='M0,0 L7.5,3 L0,6 Z' fill='#059669'/></marker>"+
+   "<marker id='arn' markerWidth='9' markerHeight='9' refX='7.5' refY='3' orient='auto' markerUnits='userSpaceOnUse'><path d='M0,0 L7.5,3 L0,6 Z' fill='#dc2626'/></marker></defs><g>";
+  rels.forEach((r,i)=>{var pos=r.sign==='+1'?'#059669':'#dc2626',mk=r.sign==='+1'?'arp':'arn';
+    svg+="<path class='edge' data-i='"+i+"' d='"+edgeD(r.a,r.b,L.pos)+"' stroke='"+pos+"' marker-end='url(#"+mk+")'/>";});
+  svg+="</g><g>";
+  nodes.forEach(nd=>{var p=L.pos[nd.name],g=grade(nd.name,nd.type),sc=srgColors(g.level),rc=roleColor(nd.role),lines=wrapName(nd.name);
+    svg+="<g class='gnode' data-nm='"+esc(nd.name)+"' transform='translate("+p.x+","+p.y+")'>"+
+      "<rect class='bg' width='"+NW+"' height='"+NH+"' rx='11' stroke='"+rc+"'/>"+
+      "<circle cx='14' cy='14' r='10.5' fill='"+sc[0]+"'/><text x='14' y='17.5' text-anchor='middle' font-size='10.5' font-weight='800' fill='"+sc[1]+"'>"+g.level+"</text>"+
+      "<text x='"+(NW-9)+"' y='17' text-anchor='end' class='role-t' fill='"+rc+"'>"+nd.role+"</text>";
+    lines.forEach((ln,i)=>{svg+="<text class='nm-t' x='"+NW/2+"' y='"+(33+i*15)+"' text-anchor='middle'>"+esc(ln)+"</text>";});
+    svg+="</g>";});
+  svg+="</g></svg>";document.getElementById('graph').innerHTML=svg;bindDrag();
+}
+function bindDrag(){
+  document.querySelectorAll('#graph .gnode').forEach(g=>{
+    var drag=false,sx,sy,ox,oy,nm=g.getAttribute('data-nm');
+    g.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;sy=e.clientY;
+      ox=graphPos[nm].x;oy=graphPos[nm].y;if(g.setPointerCapture)g.setPointerCapture(e.pointerId);
+      document.querySelectorAll('#graph .edge').forEach(pa=>{var r=rels[+pa.getAttribute('data-i')],hl=r.a===nm||r.b===nm;
+        pa.classList.toggle('hl',hl);pa.classList.toggle('dim',!hl);});});
+    g.addEventListener('pointermove',e=>{if(!drag)return;
+      var svg=document.querySelector('#graph svg'),scale=svg.viewBox.baseVal.width/svg.getBoundingClientRect().width;
+      graphPos[nm].x=ox+(e.clientX-sx)*scale;graphPos[nm].y=oy+(e.clientY-sy)*scale;
+      g.setAttribute('transform','translate('+graphPos[nm].x+','+graphPos[nm].y+')');
+      document.querySelectorAll('#graph .edge').forEach(pa=>{var r=rels[+pa.getAttribute('data-i')];
+        if(r.a===nm||r.b===nm)pa.setAttribute('d',edgeD(r.a,r.b,graphPos));});});
+    var end=()=>{drag=false;document.querySelectorAll('#graph .edge').forEach(pa=>pa.classList.remove('hl','dim'));};
+    g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);});
+}
 
 // ===== 播放工具 =====
+var RAW="国潮文化刺激 正向影响 自我品牌连接；文化认同 正向影响 自我品牌连接；自我品牌连接 正向影响 购买意愿；文化认同 正向影响 购买意愿；感知价值 正向影响 购买意愿；品牌情感 正向影响 购买意愿。";
+var nodes=[],rels=[];
 var sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function go(n){
   [1,2,3,4,5].forEach(function(i){
@@ -219,106 +411,108 @@ function go(n){
   });window.scrollTo({top:0,behavior:'smooth'});
 }
 function reset(){
-  ['#nodeList','#relList','#surveyBox','#cmpBox'].forEach(s=>document.querySelector(s).innerHTML='');
+  ['#nodeList','#relList','#surveyBox','#cmpBox','#dKpis','#graph'].forEach(s=>document.querySelector(s).innerHTML='');
   document.getElementById('raw').value='';
   document.querySelectorAll('.in,.pulse').forEach(e=>e.classList.remove('in','pulse'));
   document.getElementById('progress').style.width='0%';
 }
 async function typewriter(text,speed){
   var el=document.getElementById('raw');
-  for(var i=0;i<=text.length;i++){el.value=text.slice(0,i);if(i%4===0)await sleep(speed);}
+  for(var i=0;i<=text.length;i++){el.value=text.slice(0,i);if(i%3===0)await sleep(speed);}
 }
 function countUp(el,target,suffix,dur){
-  return new Promise(res=>{
-    var t0=performance.now();
+  return new Promise(res=>{var t0=performance.now();
     function frame(t){var p=Math.min(1,(t-t0)/dur);el.textContent=Math.round(target*p)+suffix;
       if(p<1)requestAnimationFrame(frame);else res();}
-    requestAnimationFrame(frame);
-  });
+    requestAnimationFrame(frame);});
 }
 
 // ===== 自动播放 =====
 async function play(){
   reset();
-  // Stage 1：自动输入
-  go(1);
-  await typewriter(RAW,16);
-  await sleep(500);
-  document.getElementById('b1').classList.add('pulse');
-  await sleep(800);
-
-  // Stage 2：拆解
-  var rels=parseText(RAW),map={},nodes=[];
+  rels=parseText(RAW);var map={};nodes=[];
   rels.forEach(r=>[r.a,r.b].forEach(nm=>{if(!map[nm]){map[nm]=true;nodes.push({name:nm,type:inferType(nm)});}}));
-  go(2);
-  var nbox=document.getElementById('nodeList');
-  nodes.forEach((nd,i)=>{
-    var d=document.createElement('div');d.className='node';
-    d.innerHTML="<span class='nm'>"+nd.name+"</span><span class='tag'>"+nd.type+"</span>";
-    nbox.appendChild(d);
-    setTimeout(()=>d.classList.add('in'),250+i*240);
-  });
-  await sleep(300+nodes.length*240);
-  var rbox=document.getElementById('relList');
-  rels.forEach((r,i)=>{
-    var d=document.createElement('div');d.className='rel';
-    d.innerHTML="<span>"+r.a+"</span><span class='arrow "+(r.sign==='+1'?'pos':'neg')+"'>"+
-      (r.sign==='+1'?'── 正向 →':'── 负向 →')+"</span><span>"+r.b+"</span>";
-    rbox.appendChild(d);setTimeout(()=>d.classList.add('in'),200+i*280);
-  });
-  await sleep(300+rels.length*280);
-  document.getElementById('b2').classList.add('pulse');await sleep(800);
+  computeRoles();
 
-  // Stage 3：问卷
+  // Stage 1
+  go(1);await typewriter(RAW,14);await sleep(500);
+  document.getElementById('b1').classList.add('pulse');await sleep(750);
+
+  // Stage 2
+  go(2);var nbox=document.getElementById('nodeList');
+  nodes.forEach((nd,i)=>{var d=document.createElement('div');d.className='node';
+    d.innerHTML="<span class='rb' style='background:"+roleColor(nd.role)+"22;color:"+roleColor(nd.role)+"'>"+nd.role+"</span>"+
+      "<span class='nm'>"+nd.name+"</span><span class='tag'>"+nd.type+"</span>";
+    nbox.appendChild(d);setTimeout(()=>d.classList.add('in'),220+i*230);});
+  await sleep(280+nodes.length*230);
+  var rbox=document.getElementById('relList');
+  rels.forEach((r,i)=>{var d=document.createElement('div');d.className='rel';
+    d.innerHTML="<span>"+r.a+"</span><span class='arrow'>── 正向 →</span><span>"+r.b+"</span>";
+    rbox.appendChild(d);setTimeout(()=>d.classList.add('in'),180+i*260);});
+  await sleep(260+rels.length*260);
+  document.getElementById('b2').classList.add('pulse');await sleep(750);
+
+  // Stage 3：带来源问卷
   go(3);var sbox=document.getElementById('surveyBox');
   nodes.forEach((nd,gi)=>{
     var g=document.createElement('div');g.className='qgrp';
-    g.innerHTML="<div class='section-t' style='margin:6px 0 6px'>构念："+nd.name+"</div>";
-    var qs=surveyQuestions(nd.name);
-    qs.forEach((q,qi)=>{var d=document.createElement('div');d.className='qitem';d.textContent=(qi+1)+'. '+q;g.appendChild(d);});
-    sbox.appendChild(g);
-    var base=gi*620;
-    setTimeout(()=>g.classList.add('in'),base+150);
-    qs.forEach((q,qi)=>setTimeout(()=>g.children[qi+1].classList.add('in'),base+250+qi*180));
+    var sc=matchScale(nd.name),h="<div class='gt'>构念："+nd.name+"（"+nd.role+"）</div><div class='qitem'>";
+    if(sc&&sc.special==='gcs'){
+      h+="<div class='src'><b>无统一成熟量表</b>（构念较新）。建议用<b>客观内容编码</b>（GCS 五维：纹样/工艺/版型/重构/密度）替代自报；若坚持自编问卷，须报告 EFA、CR、AVE。</div>";
+    }else if(sc){
+      h+="<div class='g'><b>测量量表：</b>"+sc.n+"</div>"+
+        "<div class='src'><b>量表来源：</b>"+sc.c+"</div>";
+      sc.i.forEach((q,i)=>h+="<div class='q'>"+(i+1)+". "+q+"</div>");
+      h+="<div class='note'>计分：李克特5级（1 非常不同意 — 5 非常同意）；正式使用请核对原文、引用出处。</div>";
+    }else{
+      h+="<div class='src'>未匹配成熟量表，请检索“"+nd.name+" 量表”并引用原始开发者与年份；自编须做内容效度、EFA、CR、AVE，<b>不得使用无出处题项</b>。</div>";
+    }
+    h+="</div>";g.innerHTML=h;sbox.appendChild(g);
+    setTimeout(()=>g.classList.add('in'),gi*560+150);
   });
-  await sleep(nodes.length*620+400);
-  document.getElementById('scaleNote').classList.add('in');
-  document.getElementById('b3').classList.add('pulse');await sleep(900);
+  await sleep(nodes.length*560+400);
+  document.getElementById('b3').classList.add('pulse');await sleep(800);
 
-  // Stage 4：替代
+  // Stage 4
   go(4);
   var results=nodes.map(nd=>({nd:nd,g:grade(nd.name,nd.type)}));
   var zero=results.filter(o=>o.g.level==='S'||o.g.level==='A').length;
   var anchor=results.filter(o=>o.g.level==='B').length;
-  var pct=Math.round(zero/nodes.length*100), oldQ=nodes.length*3+5;
+  var pct=Math.round(zero/nodes.length*100),oldQ=nodes.length*3+5;
   await Promise.all([
-    countUp(document.getElementById('kZero'),pct,'%',1100),
-    countUp(document.getElementById('kOld'),oldQ,'',1100),
-    countUp(document.getElementById('kAnchor'),anchor,' 个',1100)
-  ]);
+    countUp(document.getElementById('kZero'),pct,'%',1000),
+    countUp(document.getElementById('kOld'),oldQ,'',1000),
+    countUp(document.getElementById('kAnchor'),anchor,' 个',1000)]);
   await sleep(300);
   var cbox=document.getElementById('cmpBox');
-  results.forEach((o,i)=>{
-    var d=document.createElement('div');d.className='crow';
+  results.forEach((o,i)=>{var d=document.createElement('div');d.className='crow';
     d.innerHTML="<div class='lv "+o.g.level+"'>"+o.g.level+"</div><div><div class='n'>"+o.nd.name+
       "</div><div class='old'>传统：3 道自报题（"+o.nd.type+"）</div><div class='nw'>替代："+ALTROUTE[o.g.level]+"</div></div>";
-    cbox.appendChild(d);setTimeout(()=>d.classList.add('in'),200+i*300);
-  });
-  await sleep(300+results.length*300);
-  document.getElementById('b4').classList.add('pulse');await sleep(800);
+    cbox.appendChild(d);setTimeout(()=>d.classList.add('in'),180+i*280);});
+  await sleep(280+results.length*280);
+  document.getElementById('b4').classList.add('pulse');await sleep(750);
 
-  // Stage 5：完成
+  // Stage 5：交付仪表盘
+  go(5);
+  var scaled=nodes.filter(n=>{var s=matchScale(n.name);return s&&!s.special;}).length;
+  document.getElementById('dKpis').innerHTML=[
+    [nodes.length,'构念'],[rels.length,'关系（假设）'],[pct+'%','零问卷构念占比'],[scaled,'匹配成熟量表']]
+    .map(x=>"<div class='kpi'><b>"+x[0]+"</b><span>"+x[1]+"</span></div>").join('');
+  buildGraph();
   document.getElementById('endSummary').textContent=
     "同一套研究：可零问卷构念 "+pct+"%（S+A），传统问卷约 "+oldQ+" 题，仅 "+anchor+" 个 B 级构念需效度锚点。";
-  go(5);
   document.getElementById('progress').style.width='100%';
-  await sleep(9000);
-  play(); // 循环
+  await sleep(11000);
+  play();
 }
 document.getElementById('replayBtn').onclick=function(){play();};
 if(location.hash.indexOf('step5')>=0){
-  document.getElementById('endSummary').textContent="同一套研究：可零问卷构念 33%（S+A），传统问卷约 23 题，仅 4 个 B 级构念需效度锚点。";
-  go(5);
+  rels=parseText(RAW);var map2={};nodes=[];
+  rels.forEach(r=>[r.a,r.b].forEach(nm=>{if(!map2[nm]){map2[nm]=true;nodes.push({name:nm,type:inferType(nm)});}}));
+  computeRoles();go(5);
+  document.getElementById('dKpis').innerHTML=[['6','构念'],['6','关系（假设）'],['33%','零问卷构念占比'],['5','匹配成熟量表']]
+    .map(x=>"<div class='kpi'><b>"+x[0]+"</b><span>"+x[1]+"</span></div>").join('');
+  buildGraph();
 }else{
   window.addEventListener('load',()=>setTimeout(play,400));
 }
