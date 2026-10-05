@@ -78,13 +78,26 @@
   footer{margin-top:26px;font-size:12.5px;color:var(--muted);text-align:center}
   a{color:var(--accent)}
   .tag{font-size:11px;padding:1px 7px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
+  #status{font-size:12.5px;color:var(--accent);margin-top:10px;min-height:16px}
+  #status.err{color:var(--D)}
+  .confirm-line{margin-top:16px;border-top:1px dashed var(--line);padding-top:13px;font-size:13.5px}
+  .confirm-line input{margin-right:7px;transform:translateY(1px)}
+  .spin{display:inline-block;width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);
+    border-radius:50%;animation:rot .7s linear infinite;vertical-align:-1px;margin-right:7px}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  .addbar{display:flex;gap:7px;align-items:center;margin-top:11px;flex-wrap:wrap}
+  .addbar input,.addbar select{background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    border-radius:8px;padding:7px 9px;font-size:13px}
+  .addbar input{flex:1;min-width:120px}
+  .addbar button{padding:7px 12px;font-size:13px}
+  .node select.roleSel{border-color:var(--accent-dim);color:var(--accent)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>问卷替代实验室</h1>
-    <div class="sub">丢进一份<b>研究假设 / 概念图 / 文档</b>，立刻帮你拆解构念与关系，先给你“原本要发的问卷”，再用公开数据与数字痕迹逐个替代。<b>全程在你浏览器本地运行，不上传。</b></div>
+    <div class="sub">辅助研究生<b>搭概念图、设计带来源的问卷</b>：丢进<b>研究假设 / 概念图 / 文档</b>，自动梳理构念角色与关系，给出标注成熟量表出处的问卷，再用公开数据逐个替代。描述统计用 <b>SPSS</b>、结构模型用 <b>SmartPLS</b>。<b>全程本地运行，不上传。</b></div>
   </header>
 
   <div class="steps">
@@ -98,13 +111,14 @@
   <!-- Step 1 -->
   <section class="card show" id="c1">
     <h2>把你的研究丢进来</h2>
-    <p class="hint">直接粘贴研究假设（推荐，形如“A 正向影响 B”，每条用分号或换行）；也可读取 .txt/.md 或预览概念图。</p>
+    <p class="hint">直接粘贴研究假设（推荐，形如“A 正向影响 B”，每条用分号或换行）；也可读取 <b>.docx/.txt/.md 文档</b>，或上传概念图自动 OCR 识别。</p>
     <textarea id="raw" placeholder="例如：&#10;国潮文化刺激 正向影响 自我品牌连接；&#10;文化认同 正向影响 自我品牌连接；&#10;自我品牌连接 正向影响 购买意愿；&#10;感知价值 正向影响 购买意愿。"></textarea>
     <div class="upload">
-      <label>读取 .txt/.md<input type="file" id="fTxt" accept=".txt,.md,text/plain"></label>
-      <label>预览概念图（图片）<input type="file" id="fImg" accept="image/*"></label>
+      <label>读取文档 .docx/.txt/.md<input type="file" id="fDoc" accept=".docx,.txt,.md,text/plain"></label>
+      <label>识别概念图 OCR<input type="file" id="fImg" accept="image/*"></label>
       <button class="ghost" id="exampleBtn" type="button">填入示例研究</button>
     </div>
+    <div id="status"></div>
     <div id="preview"></div>
     <div class="nav"><span></span><button class="primary" id="to2">立即拆解 →</button></div>
   </section>
@@ -117,7 +131,8 @@
     <div class="list" id="nodeList"></div>
     <div class="section-t">关系（假设）</div>
     <div class="rels" id="relList"></div>
-    <div class="nav"><button class="ghost" id="to1b">← 上一步</button><button class="primary" id="to3">生成问卷设计 →</button></div>
+    <div class="confirm-line"><label><input type="checkbox" id="confirmChk"> 我已核对构念、测量类型与关系方向，确认无误</label></div>
+    <div class="nav"><button class="ghost" id="to1b">← 上一步</button><button class="primary" id="to3" disabled>生成问卷设计 →</button></div>
   </section>
 
   <!-- Step 3 -->
@@ -242,19 +257,33 @@ function go(n){
   });
   window.scrollTo(0,0);
 }
+function opt(list,sel){return list.map(r=>"<option value='"+r+"'"+(r===sel?' selected':'')+">"+r+"</option>").join('');}
 function renderNodes(){
   var box=document.getElementById('nodeList');box.innerHTML='';
   nodes.forEach(function(nd,i){
     var d=document.createElement('div');d.className='node';
     d.innerHTML="<input class='nm' value='"+nd.name+"'>"+
-      "<select><option value='事实'>事实</option><option value='行为'>行为</option><option value='心理'>心理</option></select>";
-    d.querySelector('select').value=nd.type;
-    d.querySelector('.nm').oninput=function(e){nd.name=e.target.value;};
-    d.querySelector('select').onchange=function(e){nd.type=e.target.value;};
+      "<select class='roleSel'>"+opt(['自变量','中介','因变量','调节','控制','待定位'],nd.role)+"</select>"+
+      "<select class='typeSel'>"+opt(['事实','行为','心理'],nd.type)+"</select>";
+    d.querySelector('.nm').oninput=function(e){nd.name=e.target.value;resetConfirm();};
+    d.querySelector('.roleSel').onchange=function(e){nd.role=e.target.value;resetConfirm();};
+    d.querySelector('.typeSel').onchange=function(e){nd.type=e.target.value;resetConfirm();};
     var del=document.createElement('span');del.className='del';del.textContent='✕';
-    del.onclick=function(){nodes.splice(i,1);renderNodes();};
+    del.onclick=function(){nodes.splice(i,1);renderNodes();renderRels();resetConfirm();};
     d.appendChild(del);box.appendChild(d);
   });
+  var bar=document.createElement('div');bar.className='addbar';
+  bar.innerHTML="<input id='newNode' placeholder='新构念名称，如：感知风险'><button type='button' id='addNode'>＋构念</button>";
+  box.appendChild(bar);
+  bar.querySelector('#addNode').onclick=function(){
+    var inp=bar.querySelector('#newNode'),v=inp.value.trim();
+    if(v&&!nodes.some(n=>n.name===v)){nodes.push({name:v,type:inferType(v),role:'待定位'});
+      renderNodes();renderRels();resetConfirm();}
+  };
+}
+function nodeSelect(id,sel){
+  return "<select id='"+id+"'>"+nodes.map(n=>"<option value='"+n.name+"'"+
+    (n.name===sel?' selected':'')+">"+n.name+"</option>").join('')+"</select>";
 }
 function renderRels(){
   var box=document.getElementById('relList');box.innerHTML='';
@@ -263,18 +292,42 @@ function renderRels(){
     d.innerHTML="<span>"+r.a+"</span><span class='arrow "+(r.sign==='+1'?'pos':'neg')+"'>"+
       (r.sign==='+1'?'── 正向 →':'── 负向 →')+"</span><span>"+r.b+"</span>";
     var flip=document.createElement('button');flip.className='ghost';flip.textContent='翻转方向';
-    flip.onclick=function(){r.sign=r.sign==='+1'?'-1':'+1';renderRels();};
+    flip.onclick=function(){r.sign=r.sign==='+1'?'-1':'+1';renderRels();resetConfirm();};
     d.appendChild(flip);box.appendChild(d);
   });
+  if(nodes.length>=2){
+    var bar=document.createElement('div');bar.className='addbar';
+    bar.innerHTML=nodeSelect('ra',nodes[0].name)+
+      "<select id='rsign'><option value='+1'>正向 →</option><option value='-1'>负向 →</option></select>"+
+      nodeSelect('rb',nodes[nodes.length-1].name)+
+      "<button type='button' id='addRel'>＋关系</button>";
+    box.appendChild(bar);
+    bar.querySelector('#addRel').onclick=function(){
+      var a=bar.querySelector('#ra').value,b=bar.querySelector('#rb').value,
+          s=bar.querySelector('#rsign').value;
+      if(a!==b&&!rels.some(r=>r.a===a&&r.b===b)){rels.push({a:a,b:b,sign:s});
+        computeRoles();renderRels();resetConfirm();}
+    };
+  }
 }
 function build(){
   rels=parseText(document.getElementById('raw').value);
   var map={};nodes=[];
   rels.forEach(function(r){[r.a,r.b].forEach(function(nm){
-    if(!map[nm]){map[nm]=true;nodes.push({name:nm,type:inferType(nm)});}
-    // 关系里的名字同步
+    if(!map[nm]){map[nm]=true;nodes.push({name:nm,type:inferType(nm),role:''});}
   });});
-  renderNodes();renderRels();
+  computeRoles();
+  renderNodes();renderRels();resetConfirm();
+}
+function computeRoles(){
+  nodes.forEach(function(nd){
+    var ind=0,out=0;
+    rels.forEach(function(r){if(r.b===nd.name)ind++;if(r.a===nd.name)out++;});
+    if(out>0&&ind===0)nd.role='自变量';
+    else if(ind>0&&out===0)nd.role='因变量';
+    else if(ind>0&&out>0)nd.role='中介';
+    else nd.role=nd.role||'待定位';
+  });
 }
 // 同步节点改名到关系
 function syncRelNames(){
@@ -283,6 +336,54 @@ function syncRelNames(){
       // 简化：不做双向映射，按当前展示
     });
   });
+}
+
+// ===== 成熟量表来源库（题项须可追溯到开发者与年份） =====
+var SCALES=[
+ {k:['购买意愿','购买意向','购买倾向'],n:'购买意愿量表',c:'Dodds, Monroe & Grewal (1991), Journal of Marketing Research',
+  i:['我购买该产品的可能性很高','我愿意考虑购买该产品','我计划在近期购买该产品']},
+ {k:['自我品牌连接','自我-品牌连接','品牌连接','自我连接'],n:'自我-品牌连接量表（SBC）',c:'Escalas & Bettman (2003), JCR；Escalas (2004), JCR',
+  i:['该品牌反映了我是谁','我觉得自己与该品牌存在个人联系','该品牌能帮助我表达我的个性']},
+ {k:['文化认同','文化身份','民族认同','本土认同'],n:'文化认同量表',c:'Cleveland & Laroche (2007), Journal of Business Research（按情境改编）',
+  i:['我认同本土文化的价值观念','我觉得自己与本土文化有很强的联系','我愿意参与本土文化相关的活动']},
+ {k:['感知价值','顾客价值','价值感知'],n:'PERVAL 感知价值量表',c:'Sweeney & Soutar (2001), Journal of Retailing（质量/情感/社会/价格四维）',
+  i:['该产品物有所值','该产品具有可接受的一致质量','该产品能给我带来良好的感受']},
+ {k:['品牌情感','品牌情绪','品牌喜爱'],n:'品牌情感量表',c:'Chaudhuri & Holbrook (2001), Journal of Marketing',
+  i:['该品牌让我感觉良好','该品牌会给我带来愉悦','我对该品牌有正面的感情']},
+ {k:['文化刺激','国潮','文化元素','客观文化','纹样','文化要素'],n:'（无统一成熟量表）',c:'构念较新，学界无统一量表',i:[],special:'gcs'},
+ {k:['满意度','满意感'],n:'顾客满意度量表',c:'Oliver (1980)；Westbrook & Oliver (1991)',
+  i:['我对该产品（服务）感到满意','它的表现符合我的预期','总体而言，我对它是满意的']},
+ {k:['信任','信赖'],n:'信任量表',c:'Morgan & Hunt (1994), Journal of Marketing',
+  i:['我认为该品牌是可靠的','我信任该品牌','我相信该品牌会信守承诺']},
+ {k:['品牌依恋','情感依恋','依恋'],n:'品牌依恋量表',c:'Thomson, MacInnis & Park (2005), Journal of Marketing',
+  i:['我对该品牌有依恋感','该品牌对我有特殊意义','若不能再使用该品牌，我会感到失落']},
+ {k:['态度'],n:'品牌态度量表',c:'Mitchell & Olson (1981)；Fishbein & Ajzen',
+  i:['我对该产品持正面态度','我认为该产品是好的','我喜欢该产品']},
+ {k:['感知有用','有用性'],n:'感知有用性量表',c:'Davis (1989), MIS Quarterly（TAM）',
+  i:['使用它能提高我的效率','它对我而言是有用的','它让我更便捷地完成任务']},
+ {k:['感知易用','易用性'],n:'感知易用性量表',c:'Davis (1989), MIS Quarterly（TAM）',
+  i:['学习使用它对我来说很容易','它的操作清晰易懂','我能够熟练地使用它']},
+ {k:['持续使用','继续使用','使用意愿','采纳意愿'],n:'持续使用意愿量表',c:'Bhattacherjee (2001), MIS Quarterly',
+  i:['我打算继续使用它','我愿意在今后经常使用它','我会推荐他人使用它']},
+ {k:['行为意愿','行为意向'],n:'行为意愿量表',c:'Ajzen (1991), OBHDP（计划行为理论 TPB）',
+  i:['我有意愿去实施该行为','我会尝试去实施该行为','我计划在未来实施该行为']},
+ {k:['主观规范','规范信念'],n:'主观规范量表',c:'Ajzen (1991)（TPB）',
+  i:['对我重要的人认为我应该这么做','我看重其看法的人希望我这么做','我会参考重要他人的意见']},
+ {k:['感知行为控制','行为控制'],n:'感知行为控制量表',c:'Ajzen (1991)（TPB）',
+  i:['我有能力实施该行为','我具备实施该行为的资源与条件','是否实施该行为完全在我掌控中']},
+ {k:['忠诚度','品牌忠诚','复购意愿','忠诚'],n:'品牌忠诚量表',c:'Chaudhuri & Holbrook (2001)；Yoo & Donthu (2001)',
+  i:['下次购买时我会优先选择该品牌','我会持续重复购买该品牌','即使有竞争品牌，我仍选择它']},
+ {k:['心流','沉浸','流畅体验'],n:'心流体验量表',c:'Novak, Hoffman & Yung (2000), Marketing Science',
+  i:['使用时我会全神贯注','我感觉时间过得很快','我完全投入其中']},
+ {k:['自我效能','效能感'],n:'一般自我效能感量表',c:'Schwarzer & Jerusalem；参 Bandura',
+  i:['我相信自己有能力应对问题','遇到困难时我能找到解决办法','即使出现意外，我也能妥善处理']},
+ {k:['内在动机','内部动机'],n:'内在动机量表',c:'Deci & Ryan；Vallerand',
+  i:['我是因为兴趣而做这件事','做这件事的过程本身让我愉快','即使没有外部奖励，我也愿意做']}
+];
+function matchScale(name){
+  for(var x=0;x<SCALES.length;x++)for(var y=0;y<SCALES[x].k.length;y++)
+    if(name.indexOf(SCALES[x].k[y])>=0)return SCALES[x];
+  return null;
 }
 
 // Step3 问卷
@@ -294,10 +395,22 @@ function surveyQuestions(name){
 function renderSurvey(){
   var box=document.getElementById('surveyBox');box.innerHTML='';var total=0;
   nodes.forEach(function(nd){
-    var qs=surveyQuestions(nd.name);total+=qs.length;
-    var t=document.createElement('div');t.className='section-t';t.textContent='构念：'+nd.name;box.appendChild(t);
-    qs.forEach(function(q,i){var d=document.createElement('div');d.className='qitem';
-      d.innerHTML=(i+1)+'. '+q+" <span class='tag'>"+nd.type+"</span>";box.appendChild(d);});
+    var sc=matchScale(nd.name);
+    var t=document.createElement('div');t.className='section-t';
+    t.textContent='构念：'+nd.name+'（'+(nd.role||'待定位')+'）';box.appendChild(t);
+    var d=document.createElement('div');d.className='qitem';var h='';
+    if(sc&&sc.special==='gcs'){
+      d.innerHTML="⚠ 该构念无统一成熟量表。建议用<b>客观内容编码</b>（如本项目 GCS 五维：纹样/工艺/版型/重构/密度）替代自报；若坚持用问卷，须自编并报告 EFA、CR、AVE，不能套用无出处题项。";
+    }else if(sc){
+      h="<div class='g'>测量量表："+sc.n+"</div><div class='g'>量表来源："+sc.c+"</div>";
+      sc.i.forEach(function(q,i){h+="<div>"+(i+1)+". "+q+"</div>";total++;});
+      h+="<div class='g' style='margin-top:6px'>计分：李克特5级（1 非常不同意 — 5 非常同意）。题项据该量表常见中文译法整理，正式使用请核对原文、引用原始出处。</div>";
+      d.innerHTML=h;
+    }else{
+      d.innerHTML="⚠ 未匹配到成熟量表。请在知网 / Web of Science 检索“"+nd.name+
+        " 量表”，引用原始开发者与年份；若确需自编，须做内容效度、EFA、CR、AVE，<b>不得使用无出处题项</b>。";
+    }
+    box.appendChild(d);
   });
   box.dataset.total=total+5;
 }
@@ -321,15 +434,25 @@ function renderCompare(){
 // Step5 导出
 function renderExport(){
   var L=[];
-  L.push('# 问卷替代方案（由在线 Demo 生成，特定输入下的相对推演）');
-  L.push('\n## 构念与测量类型');
-  nodes.forEach(function(nd){L.push('- '+nd.name+'（'+nd.type+'）');});
-  L.push('\n## 关系（假设）');
+  L.push('# 研究设计与问卷替代方案（在线工具生成 · 特定输入下的相对推演，非预测值）');
+  L.push('\n## 一、构念与角色');
+  nodes.forEach(function(nd){L.push('- '+nd.name+'｜角色：'+(nd.role||'待定位')+'｜测量类型：'+nd.type);});
+  L.push('\n## 二、关系（假设）');
   rels.forEach(function(r){L.push('- '+r.a+' '+(r.sign==='+1'?'正向':'负向')+'→ '+r.b);});
-  L.push('\n## SRG 替代度与路线');
+  L.push('\n## 三、问卷量表与来源');
+  nodes.forEach(function(nd){
+    var sc=matchScale(nd.name);
+    if(sc&&sc.special==='gcs')L.push('- '+nd.name+'：无统一量表，建议客观内容编码（GCS）；若自编须报 EFA/CR/AVE');
+    else if(sc)L.push('- '+nd.name+'：'+sc.n+'，来源 '+sc.c);
+    else L.push('- '+nd.name+'：未匹配，须检索并引用原始量表，不得使用无出处题项');
+  });
+  L.push('\n## 四、SRG 替代度与路线');
   nodes.forEach(function(nd){var g=grade(nd.name,nd.type);
     L.push('- ['+g.level+'] '+nd.name+'：'+ALTROUTE[g.level]);});
-  L.push('\n注：分级为初筛，最终需匹配数据源并做效度论证；不预测未来。');
+  L.push('\n## 五、数据分析路径（聚焦，不贪多）');
+  L.push('- SPSS：描述性统计（样本特征、均值、标准差）、信度 Cronbach’s α、相关分析、共同方法偏差（Harman 单因子）');
+  L.push('- SmartPLS（PLS-SEM）：测量模型（因子载荷、CR、AVE；区别效度 HTMT / Fornell–Larcker）→ 结构模型（路径系数 β、R²、f²、Q²，5000 次 bootstrap 检验假设）');
+  L.push('\n注：分级为初筛；量表题项正式使用须核对原文、引用出处；本工具不预测未来。');
   L.push('完整方法论：https://github.com/zhanglingshare/nosurvey-lab');
   document.getElementById('export').value=L.join('\n');
 }
@@ -357,18 +480,88 @@ document.getElementById('exampleBtn').onclick=function(){
    "自我品牌连接 正向影响 购买意愿；文化认同 正向影响 购买意愿；"+
    "感知价值 正向影响 购买意愿；品牌情感 正向影响 购买意愿。";
 };
-// 文件读取
-document.getElementById('fTxt').onchange=function(e){
-  var f=e.target.files[0];if(!f)return;var r=new FileReader();
-  r.onload=function(){document.getElementById('raw').value=r.result;
-    document.getElementById('preview').textContent='已读取：'+f.name;};
-  r.readAsText(f);
+// ===== 通用工具 =====
+function loadScript(src){return new Promise((res,rej)=>{var s=document.createElement('script');
+  s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+function setStatus(msg,isErr){var el=document.getElementById('status');if(!el)return;
+  el.innerHTML=msg;el.className=isErr?'err':'';}
+// 确认环节
+function resetConfirm(){var c=document.getElementById('confirmChk');if(c)c.checked=false;
+  var b=document.getElementById('to3');if(b)b.disabled=true;}
+document.getElementById('confirmChk').onchange=function(){
+  document.getElementById('to3').disabled=!this.checked;};
+
+// ===== DOCX 读取（原生 zip 解压，零依赖） =====
+async function inflateRaw(comp){
+  try{var ds=new DecompressionStream('deflate-raw');
+    return new Uint8Array(await new Response(new Blob([comp]).stream().pipeThrough(ds)).arrayBuffer());
+  }catch(e){var ds2=new DecompressionStream('deflate');
+    return new Uint8Array(await new Response(new Blob([comp]).stream().pipeThrough(ds2)).arrayBuffer());}
+}
+async function readDocx(buf){
+  var dv=new DataView(buf),n=buf.byteLength,eocd=-1;
+  for(var i=n-22;i>=Math.max(0,n-70000);i--){if(dv.getUint32(i,true)===0x06054b50){eocd=i;break;}}
+  if(eocd<0)throw new Error('未找到 docx 结构');
+  var p=dv.getUint32(eocd+16,true),cnt=dv.getUint16(eocd+10,true),target=null;
+  for(var c=0;c<cnt;c++){
+    if(dv.getUint32(p,true)!==0x02014b50)break;
+    var method=dv.getUint16(p+10,true),csize=dv.getUint32(p+20,true);
+    var nlen=dv.getUint16(p+28,true),elen=dv.getUint16(p+30,true),clen=dv.getUint16(p+32,true);
+    var lho=dv.getUint32(p+42,true);
+    var name=new TextDecoder().decode(new Uint8Array(buf,p+46,nlen));
+    if(name==='word/document.xml'){
+      var lnlen=dv.getUint16(lho+26,true),lelen=dv.getUint16(lho+28,true);
+      var start=lho+30+lnlen+lelen,comp=new Uint8Array(buf,start,csize);
+      target=method===0?comp:await inflateRaw(comp);
+    }
+    p+=46+nlen+elen+clen;
+  }
+  if(!target)throw new Error('缺少 word/document.xml');
+  var xml=new TextDecoder().decode(target);
+  var text=xml.replace(/<w:tab[^>]*>/g,' ').replace(/<\/w:p>/g,'\n').replace(/<[^>]+>/g,'');
+  return text.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'");
+}
+
+// ===== 文档读取（.docx/.txt/.md） =====
+document.getElementById('fDoc').onchange=async function(e){
+  var f=e.target.files[0];if(!f)return;
+  if(/\.docx$/i.test(f.name)){
+    setStatus("<span class='spin'></span>正在解析文档…");
+    try{var buf=await f.arrayBuffer(),txt=await readDocx(buf);
+      document.getElementById('raw').value=txt;
+      document.getElementById('preview').textContent='已读取文档：'+f.name+'（约 '+txt.length+' 字），点“立即拆解”。';
+      setStatus('文档解析完成。');
+    }catch(err){setStatus('文档解析失败：'+err.message+'；可复制正文粘贴。',true);}
+  }else{
+    var r=new FileReader();
+    r.onload=function(){document.getElementById('raw').value=r.result;
+      document.getElementById('preview').textContent='已读取：'+f.name;setStatus('');};
+    r.readAsText(f);
+  }
 };
-document.getElementById('fImg').onchange=function(e){
-  var f=e.target.files[0];if(!f)return;var r=new FileReader();
-  r.onload=function(){var p=document.getElementById('preview');
-    p.innerHTML='已预览概念图：'+f.name+'（本地演示版不自动识别图中节点，请在下方用文字列出关系）<img src="'+r.result+'">';};
-  r.readAsDataURL(f);
+
+// ===== 概念图 OCR =====
+document.getElementById('fImg').onchange=async function(e){
+  var f=e.target.files[0];if(!f)return;
+  var url=URL.createObjectURL(f);
+  document.getElementById('preview').innerHTML='<img src="'+url+'">';
+  setStatus("<span class='spin'></span>正在加载识别组件…");
+  try{
+    if(typeof Tesseract==='undefined')
+      await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+    setStatus("<span class='spin'></span>正在 OCR 识别概念图（中文，首次需下载语言包）…");
+    var worker=await Tesseract.createWorker('chi_sim+eng',1,{logger:function(){}});
+    var ret=await worker.recognize(f);await worker.terminate();
+    var lines=[];
+    (ret.data.blocks||[]).forEach(b=>(b.paragraphs||[]).forEach(
+      pa=>(pa.lines||[]).forEach(l=>lines.push(l.text))));
+    if(!lines.length&&ret.data.text)lines=ret.data.text.split('\n');
+    lines=lines.map(s=>s.trim()).filter(s=>s.length>=2);
+    var joined=lines.join('\n');document.getElementById('raw').value=joined;
+    var rr=parseText(joined);
+    if(rr.length>0)setStatus('识别完成，已解析出 '+rr.length+' 条关系，请在下一步核对确认。');
+    else setStatus('识别到 '+lines.length+' 个文字标签作为构念；连线方向未能自动识别，请在下一步补充关系。');
+  }catch(err){setStatus('OCR 不可用（需联网加载组件）：'+err.message+'；请在文本框用文字列出关系。',true);}
 };
 
 // 演示/截图钩子：#step2 … #step5 自动用示例构建并跳到对应步骤
