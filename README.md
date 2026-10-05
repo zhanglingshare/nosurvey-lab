@@ -11,6 +11,8 @@
 
 **<https://zhanglingshare.github.io/nosurvey-lab/>** —— 打开后点“载入国潮案例 6 构念 → 开始判定”即可体验；纯前端、无后端、不上传数据。
 
+**🎞 自动演示（打开即自动演完“输入→拆解→问卷→替代→导出”，无需点击、可循环）：<https://zhanglingshare.github.io/nosurvey-lab/demo.html>**
+
 ## 为什么需要它
 
 量化论文默认“数据＝问卷”，但问卷有三类内容，替代难度完全不同：
