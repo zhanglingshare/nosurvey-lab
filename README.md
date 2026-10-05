@@ -1,7 +1,7 @@
-# No-Survey Lab · 问卷替代实验室
+# 研究生科研助手 · No-Survey Lab（问卷替代实验室）
 
-**你的研究生科研助手：搭概念模型、设计带来源的问卷、用公开数据替代问卷、跑通 SPSS → SmartPLS 分析路径。**
-A research assistant that helps you build the conceptual model, design questionnaires with **cited, mature scales**, replace surveys with public data & digital traces, and follow a focused SPSS → SmartPLS analysis path.
+**搭概念模型、设计带来源的问卷、用公开数据替代问卷、跑通 SPSS → SmartPLS 分析路径——你的论文科研助手。**
+A research assistant for your thesis: build the conceptual model, design questionnaires with **cited, mature scales**, replace surveys with public data & digital traces, and follow a focused SPSS → SmartPLS path.
 
 [![License: MIT](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
 [![License: CC BY 4.0](https://img.shields.io/badge/docs%20%26%20data-CC%20BY%204.0-lightgrey.svg)](LICENSE-DOCS.md)
